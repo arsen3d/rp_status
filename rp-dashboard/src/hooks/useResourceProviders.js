@@ -2,64 +2,110 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import ResourceProviderService from '../services/ResourceProviderService';
 
+// Define a common query key for all hooks that use the same data source
+const RESOURCE_DATA_QUERY_KEY = ['resource-data'];
+
 // Custom hook for fetching resource providers
 export const useResourceProviders = () => {
   return useQuery({
-    queryKey: ['resource-providers'],
+    queryKey: RESOURCE_DATA_QUERY_KEY,
     queryFn: ResourceProviderService.getAll,
-    staleTime: 60000, // 1 minute
-    refetchInterval: 60000 // 1 minute
+    staleTime: 5000, // 5 seconds
+    refetchInterval: 5000 // 5 seconds
   });
 };
 
 // Custom hook for fetching a specific resource provider
 export const useResourceProvider = (id) => {
-  return useQuery({
-    queryKey: ['resource-provider', id],
-    queryFn: () => ResourceProviderService.getById(id),
-    enabled: !!id,
-    staleTime: 60000 // 1 minute
+  // First get the shared data
+  const { data: allProviders, isLoading, error } = useQuery({
+    queryKey: RESOURCE_DATA_QUERY_KEY,
+    queryFn: ResourceProviderService.getAll,
+    staleTime: 5000, // 5 seconds
+    refetchInterval: 5000, // 5 seconds
+    enabled: !!id
   });
+  
+  // Then filter locally to get the specific provider
+  const provider = allProviders ? allProviders.find(p => p.id === id) : null;
+  
+  return {
+    data: provider,
+    isLoading,
+    error
+  };
 };
 
 // Custom hook for fetching deals
 export const useDeals = () => {
+  // Reuse the same query to avoid multiple data fetches
   return useQuery({
-    queryKey: ['deals'],
+    queryKey: RESOURCE_DATA_QUERY_KEY,
     queryFn: ResourceProviderService.getDeals,
-    staleTime: 60000, // 1 minute
-    refetchInterval: 60000 // 1 minute
+    staleTime: 5000, // 5 seconds
+    refetchInterval: 5000 // 5 seconds
   });
 };
 
 // Custom hook for fetching a specific deal
 export const useDeal = (id) => {
-  return useQuery({
-    queryKey: ['deal', id],
-    queryFn: () => ResourceProviderService.getDealById(id),
-    enabled: !!id,
-    staleTime: 60000 // 1 minute
+  // First get the shared data
+  const { data: allDeals, isLoading, error } = useQuery({
+    queryKey: RESOURCE_DATA_QUERY_KEY,
+    queryFn: ResourceProviderService.getDeals,
+    staleTime: 5000, // 5 seconds
+    refetchInterval: 5000, // 5 seconds
+    enabled: !!id
   });
+  
+  // Then filter locally to get the specific deal
+  const deal = allDeals ? allDeals.find(d => d.deal_id === id) : null;
+  
+  return {
+    data: deal,
+    isLoading,
+    error
+  };
 };
 
 // Custom hook for fetching hardware specs
 export const useHardwareSpecs = () => {
-  return useQuery({
-    queryKey: ['hardware'],
-    queryFn: ResourceProviderService.getHardwareSpecs,
-    staleTime: 60000, // 1 minute
-    refetchInterval: 60000 // 1 minute
+  // Reuse the same query but transform the data
+  const { data: allProviders, isLoading, error } = useQuery({
+    queryKey: RESOURCE_DATA_QUERY_KEY,
+    queryFn: ResourceProviderService.getAll,
+    staleTime: 5000, // 5 seconds
+    refetchInterval: 5000 // 5 seconds
   });
+  
+  // Transform the data if available
+  const hardwareSpecs = allProviders ? ResourceProviderService.transformToHardwareSpecs(allProviders) : null;
+  
+  return {
+    data: hardwareSpecs,
+    isLoading,
+    error
+  };
 };
 
 // Custom hook for fetching network stats
 export const useNetworkStats = () => {
-  return useQuery({
-    queryKey: ['network-stats'],
-    queryFn: ResourceProviderService.getNetworkStats,
-    staleTime: 60000, // 1 minute
-    refetchInterval: 60000 // 1 minute
+  // Reuse the same query but transform the data
+  const { data: allProviders, isLoading, error } = useQuery({
+    queryKey: RESOURCE_DATA_QUERY_KEY,
+    queryFn: ResourceProviderService.getAll,
+    staleTime: 5000, // 5 seconds
+    refetchInterval: 5000 // 5 seconds
   });
+  
+  // Transform the data if available
+  const networkStats = allProviders ? ResourceProviderService.calculateNetworkStats(allProviders) : null;
+  
+  return {
+    data: networkStats,
+    isLoading,
+    error
+  };
 };
 
 // Custom hook for providers with pagination, filtering, and sorting
@@ -71,7 +117,13 @@ export const useResourceProvidersTable = () => {
   });
   const [sortModel, setSortModel] = useState([]);
 
-  const { data: rawData, isLoading, error } = useResourceProviders();
+  // Reuse the same shared query
+  const { data: rawData, isLoading, error } = useQuery({
+    queryKey: RESOURCE_DATA_QUERY_KEY,
+    queryFn: ResourceProviderService.getAll,
+    staleTime: 5000, // 5 seconds
+    refetchInterval: 5000 // 5 seconds
+  });
   
   // Transform the data to match the expected format for DataGrid
   const data = rawData ? rawData.map(provider => {
