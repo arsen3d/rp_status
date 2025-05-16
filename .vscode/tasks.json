@@ -1,0 +1,50 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Start React Dev Server",
+      "type": "shell",
+      "command": "cd rp-dashboard && npm run dev",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": [],
+      "isBackground": true,
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
+    },
+    {
+      "label": "Launch Chrome with Debugging",
+      "type": "shell",
+      "command": "google-chrome --remote-debugging-port=9222 --user-data-dir=${workspaceFolder}/.vscode/chrome-debug-profile http://localhost:5173",
+      "windows": {
+        "command": "start chrome --remote-debugging-port=9222 --user-data-dir=${workspaceFolder}\\.vscode\\chrome-debug-profile http://localhost:5173"
+      },
+      "osx": {
+        "command": "open -a \"Google Chrome\" --args --remote-debugging-port=9222 --user-data-dir=${workspaceFolder}/.vscode/chrome-debug-profile http://localhost:5173"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "silent",
+        "panel": "shared"
+      },
+      "dependsOn": ["Start React Dev Server"]
+    },
+    {
+      "label": "Debug React Application",
+      "dependsOrder": "sequence",
+      "dependsOn": [
+        "Start React Dev Server",
+        "Launch Chrome with Debugging"
+      ],
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "problemMatcher": []
+    }
+  ]
+}
