@@ -29,7 +29,7 @@ const Dashboard = () => {
       ) : error ? (
         <Typography color="error">Error loading network stats</Typography>
       ) : (
-        <Grid container spacing={3}>
+        <Grid container spacing={4}>
           {/* Stats Row */}
           <Grid item xs={12} sm={6} md={3}>
             <StatCard 
@@ -39,6 +39,7 @@ const Dashboard = () => {
               color="primary"
             />
           </Grid>
+          
           <Grid item xs={12} sm={6} md={3}>
             <StatCard 
               title="Active Deals" 

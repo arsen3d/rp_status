@@ -64,14 +64,22 @@ const GpuDistribution = () => {
         <Typography variant="h6" gutterBottom>GPU Distribution</Typography>
         
         {gpuData.length > 0 ? (
-          <Box sx={{ height: 220 }}>
+          <Box sx={{ height: 220, mb: 2 }}>
             <BarChart
               xAxis={[
                 { 
                   scaleType: 'band', 
                   data: xLabels,
+                  label: 'GPU Models',
                   tickLabelStyle: {
-                    fontSize: 10,
+                    fontSize: 0,
+                    textAnchor: 'end',
+                    transform: 'rotate(-45)',
+                    dominantBaseline: 'central',
+                  },
+                  tickLabelStyle: {
+                    fontSize: 0,
+                    
                     textAnchor: 'end',
                     transform: 'rotate(-45)',
                     dominantBaseline: 'central',
@@ -86,15 +94,17 @@ const GpuDistribution = () => {
                   label: 'Count',
                 },
               ]}
-              height={220}
-              margin={{ top: 20, bottom: 70, left: 40, right: 20 }}
+              height={255}
+              margin={{ top: 20, bottom: 30, left: 40, right: 20 }}
               slotProps={{
                 legend: { hidden: true },
               }}
             />
           </Box>
         ) : (
-          <Typography>No GPU data available</Typography>
+          <Box sx={{ mt: 3 }}>
+            <Typography>No GPU data available</Typography>
+          </Box>
         )}
       </CardContent>
     </Card>

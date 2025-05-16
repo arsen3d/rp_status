@@ -117,6 +117,20 @@ export const darkTheme = createTheme({
         root: {
           borderRadius: 8,
           boxShadow: '0 4px 6px rgba(0,0,0,0.3)',
+          padding: '16px',
+        },
+      },
+    },
+    MuiChip: {
+      styleOverrides: {
+        root: {
+          fontWeight: 500,
+        },
+        colorPrimary: {
+          backgroundColor: '#5c6bc0',
+        },
+        colorSecondary: {
+          backgroundColor: '#ff4081',
         },
       },
     },

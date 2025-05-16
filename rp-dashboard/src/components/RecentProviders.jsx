@@ -50,7 +50,7 @@ const RecentProviders = () => {
     const bTimestamp = debugLogger.safeGet(b, 'resource_offer.created_at', 0);
     const aTimestamp = debugLogger.safeGet(a, 'resource_offer.created_at', 0);
     return bTimestamp - aTimestamp;
-  }).slice(0, 5); // Take only the 5 most recent
+  }).slice(0, 3); // Take only the 5 most recent
   
   return (
     <Card sx={{ height: '100%', minHeight: 300 }}>
