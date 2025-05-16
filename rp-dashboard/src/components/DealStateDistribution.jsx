@@ -78,10 +78,10 @@ const DealStateDistribution = () => {
                 legend: { 
                   direction: 'column',
                   position: { vertical: 'middle', horizontal: 'right' },
-                  itemMarkWidth: 20,
-                  itemMarkHeight: 10,
-                  markGap: 5,
-                  itemGap: 10,
+                  itemmarkwidth: 20,
+                  itemmarkheight: 10,
+                  markgap: 5,
+                  itemgap: 10,
                 },
               }}
               sx={{

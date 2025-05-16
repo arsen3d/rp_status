@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
 import axios from 'axios'
-import debugLogger from './utils/debugLogger';
+import { debugLogger } from './utils/debugLogger';
 
 // Configure global error handlers for debugging
 window.onerror = function(message, source, lineno, colno, error) {
