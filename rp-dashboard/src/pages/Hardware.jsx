@@ -25,6 +25,7 @@ import { BarChart } from '@mui/x-charts/BarChart';
 import { useTheme } from '@mui/material/styles';
 import { useHardwareSpecs } from '../hooks/useResourceProviders';
 import { formatBytes, truncateAddress } from '../utils/formatters';
+import { debugLogger } from '../utils/debugLogger';
 
 const Hardware = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -247,7 +248,7 @@ const Hardware = () => {
                         <TableRow key={hw.id}>
                           <TableCell>
                             <Chip 
-                              label={truncateAddress(hw.resourceProvider)} 
+                              label={truncateAddress(debugLogger.safeGet(hw, 'resourceProvider', 'Unknown'))} 
                               variant="outlined"
                               size="small"
                             />

@@ -149,8 +149,18 @@ export const getDealStateColor = (state) => {
 
 // Helper to truncate Ethereum addresses
 export const truncateAddress = (address, startChars = 6, endChars = 4) => {
-  if (!address) return '';
-  return `${address.slice(0, startChars)}...${address.slice(-endChars)}`;
+  // Handle null, undefined, or non-string values
+  if (!address) return 'Unknown';
+  
+  // Convert to string if it's not already a string
+  const addressStr = String(address);
+  
+  // Check if the address is too short to truncate
+  if (addressStr.length <= startChars + endChars + 3) {
+    return addressStr;
+  }
+  
+  return `${addressStr.slice(0, startChars)}...${addressStr.slice(-endChars)}`;
 };
 
 export default {

@@ -205,14 +205,16 @@ const Financial = () => {
                           </Box>
                         }
                         secondary={
-                          <Box sx={{ mt: 1 }}>
-                            <LinearProgress
-                              variant="determinate"
-                              value={model.value}
-                              color={index === 0 ? "primary" : index === 1 ? "secondary" : "info"}
-                              sx={{ height: 8, borderRadius: 4 }}
-                            />
-                          </Box>
+                          <Typography component="div" variant="body2" color="text.secondary">
+                            <Box sx={{ mt: 1 }}>
+                              <LinearProgress
+                                variant="determinate"
+                                value={model.value}
+                                color={index === 0 ? "primary" : index === 1 ? "secondary" : "info"}
+                                sx={{ height: 8, borderRadius: 4 }}
+                              />
+                            </Box>
+                          </Typography>
                         }
                       />
                     </ListItem>

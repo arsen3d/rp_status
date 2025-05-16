@@ -16,6 +16,7 @@ import {
 import { Person } from '@mui/icons-material';
 import { useResourceProviders } from '../hooks/useResourceProviders';
 import { getProviderStatus, getStatusColor, timeAgo, truncateAddress } from '../utils/formatters';
+import { debugLogger } from '../utils/debugLogger';
 
 const RecentProviders = () => {
   const { data: providers, isLoading, error } = useResourceProviders();
@@ -45,9 +46,11 @@ const RecentProviders = () => {
   }
   
   // Sort providers by created_at timestamp (most recent first)
-  const sortedProviders = [...providers].sort((a, b) => 
-    b.resource_offer.created_at - a.resource_offer.created_at
-  ).slice(0, 5); // Take only the 5 most recent
+  const sortedProviders = [...(providers || [])].sort((a, b) => {
+    const bTimestamp = debugLogger.safeGet(b, 'resource_offer.created_at', 0);
+    const aTimestamp = debugLogger.safeGet(a, 'resource_offer.created_at', 0);
+    return bTimestamp - aTimestamp;
+  }).slice(0, 5); // Take only the 5 most recent
   
   return (
     <Card sx={{ height: '100%', minHeight: 300 }}>
@@ -55,8 +58,9 @@ const RecentProviders = () => {
         <Typography variant="h6" gutterBottom>Recent Providers</Typography>
         <List sx={{ width: '100%' }}>
           {sortedProviders.map((provider, index) => {
-            const providerAddress = provider.resource_offer.resource_provider;
-            const createdAt = provider.resource_offer.created_at;
+            const providerAddress = debugLogger.safeGet(provider, 'resource_offer.resource_provider', 
+              debugLogger.safeGet(provider, 'resource_provider', 'Unknown'));
+            const createdAt = debugLogger.safeGet(provider, 'resource_offer.created_at', Date.now());
             const status = getProviderStatus(createdAt);
             const statusColor = getStatusColor(status);
             

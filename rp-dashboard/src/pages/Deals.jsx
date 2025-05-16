@@ -31,6 +31,7 @@ import { LineChart } from '@mui/x-charts/LineChart';
 import { useDeals } from '../hooks/useResourceProviders';
 import { useTheme } from '@mui/material/styles';
 import { getDealStateText, getDealStateColor, truncateAddress, formatDate, timeAgo } from '../utils/formatters';
+import { debugLogger } from '../utils/debugLogger';
 
 const Deals = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -144,7 +145,9 @@ const Deals = () => {
       field: 'timeAgo',
       headerName: 'Time',
       width: 150,
-      valueGetter: (params) => timeAgo(params.row.createdAt),
+      valueGetter: (params) => {
+        return timeAgo(debugLogger.safeGet(params, 'row.createdAt', new Date()));
+      },
     },
     {
       field: 'actions',
