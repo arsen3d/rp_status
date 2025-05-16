@@ -5,12 +5,12 @@ import { lightTheme, darkTheme } from '../theme';
 // Create Theme context
 export const ColorModeContext = createContext({
   toggleColorMode: () => {},
-  mode: 'light',
+  mode: 'dark',
 });
 
 export const ThemeContextProvider = ({ children }) => {
-  // Check local storage for saved theme preference or default to light
-  const storedMode = localStorage.getItem('themeMode') || 'light';
+  // Check local storage for saved theme preference or default to dark
+  const storedMode = localStorage.getItem('themeMode') || 'dark';
   const [mode, setMode] = useState(storedMode);
 
   // Effect to update localStorage when mode changes
