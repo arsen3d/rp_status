@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { debugLogger } from '../utils/debugLogger';
 
 // Mock API URL - to be replaced with actual API endpoint
 const API_URL = '/api';
@@ -68,11 +69,26 @@ const ResourceProviderService = {
       // For now, we'll extract hardware info from the mock data
       const response = await axios.get('/sample.json');
       const providers = Array.isArray(response.data) ? response.data : [response.data];
-      return providers.map(provider => ({
-        id: provider.id,
-        resourceProvider: provider.resource_offer.resource_provider,
-        spec: provider.resource_offer.spec
-      }));
+      
+      // Log the first provider data to help with debugging
+      if (providers.length > 0) {
+        debugLogger.warn('Sample provider data structure', { 
+          provider: providers[0]
+        });
+      }
+      
+      return providers.map(provider => {
+        // Use safeGet to safely access nested properties with fallback values
+        const resourceProvider = debugLogger.safeGet(provider, 'resource_offer.resource_provider', 
+          // Fallback to the top-level resource_provider if the nested one doesn't exist
+          debugLogger.safeGet(provider, 'resource_provider', 'unknown'));
+        
+        return {
+          id: debugLogger.safeGet(provider, 'id', 'unknown-id'),
+          resourceProvider: resourceProvider,
+          spec: debugLogger.safeGet(provider, 'resource_offer.spec', {})
+        };
+      });
     } catch (error) {
       console.error('Error fetching hardware specs:', error);
       throw error;

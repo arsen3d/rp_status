@@ -71,14 +71,25 @@ export const useResourceProvidersTable = () => {
   });
   const [sortModel, setSortModel] = useState([]);
 
-  const { data, isLoading, error } = useResourceProviders();
+  const { data: rawData, isLoading, error } = useResourceProviders();
+  
+  // Transform the data to match the expected format for DataGrid
+  const data = rawData ? rawData.map(provider => {
+    return {
+      id: provider.id,
+      resourceProvider: provider.resource_provider,
+      state: provider.state,
+      createdAt: provider.resource_offer?.created_at || Date.now(),
+      spec: provider.resource_offer?.spec || {},
+    };
+  }) : [];
 
   // Apply filters manually (in a real app, this would be done server-side)
   const filteredData = data ? data.filter(provider => {
     if (filterModel.items.length === 0) return true;
     
     return filterModel.items.every(filter => {
-      const value = provider.resource_offer.resource_provider;
+      const value = provider.resourceProvider || '';
       if (filter.operatorValue === 'contains') {
         return value.toLowerCase().includes(filter.value.toLowerCase());
       }
@@ -91,8 +102,8 @@ export const useResourceProvidersTable = () => {
     if (sortModel.length === 0) return 0;
     
     const sortItem = sortModel[0];
-    const aValue = a.resource_offer.resource_provider;
-    const bValue = b.resource_offer.resource_provider;
+    const aValue = a.resourceProvider || '';
+    const bValue = b.resourceProvider || '';
     
     return sortItem.sort === 'asc' 
       ? aValue.localeCompare(bValue)

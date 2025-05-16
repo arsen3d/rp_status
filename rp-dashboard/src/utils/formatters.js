@@ -70,19 +70,34 @@ export const timeAgo = (timestamp) => {
   return Math.floor(seconds) + ' seconds ago';
 };
 
-// Get provider status based on last seen timestamp
-export const getProviderStatus = (lastSeen) => {
-  const now = new Date();
-  const lastSeenDate = new Date(lastSeen);
-  const diffMinutes = Math.floor((now - lastSeenDate) / (1000 * 60));
-  
-  if (diffMinutes < 5) {
-    return 'active';
-  } else if (diffMinutes < 30) {
-    return 'idle';
-  } else {
-    return 'offline';
+// Get provider status based on state code
+export const getProviderStatus = (state) => {
+  // If state is a timestamp, use the time-based logic
+  if (typeof state === 'string' || state instanceof Date) {
+    const now = new Date();
+    const lastSeenDate = new Date(state);
+    const diffMinutes = Math.floor((now - lastSeenDate) / (1000 * 60));
+    
+    if (diffMinutes < 5) {
+      return 'active';
+    } else if (diffMinutes < 30) {
+      return 'idle';
+    } else {
+      return 'offline';
+    }
   }
+  
+  // If state is a number, map it to a status string
+  const stateMap = {
+    0: 'created',
+    1: 'offered',
+    2: 'accepted',
+    3: 'active',
+    4: 'inactive',
+    5: 'offline'
+  };
+  
+  return stateMap[state] || 'unknown';
 };
 
 // Get color for status
@@ -91,11 +106,16 @@ export const getStatusColor = (status) => {
     case 'active':
       return 'success';
     case 'idle':
+    case 'offered':
+    case 'accepted':
       return 'warning';
     case 'offline':
+    case 'inactive':
       return 'error';
-    default:
+    case 'created':
       return 'info';
+    default:
+      return 'default';
   }
 };
 

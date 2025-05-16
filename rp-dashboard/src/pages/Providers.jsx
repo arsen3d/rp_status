@@ -1,3 +1,4 @@
+// filepath: /root/rp_status/rp-dashboard/src/pages/Providers.jsx
 import { useState } from 'react';
 import { 
   Box, 
@@ -16,6 +17,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import PersonIcon from '@mui/icons-material/Person';
 import { useResourceProvidersTable } from '../hooks/useResourceProviders';
 import { formatBytes, timeAgo, getProviderStatus, getStatusColor, truncateAddress } from '../utils/formatters';
+import { debugLogger } from '../utils/debugLogger';
 
 const Providers = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -41,6 +43,10 @@ const Providers = () => {
       headerName: 'Provider',
       flex: 1,
       minWidth: 180,
+      valueGetter: (params) => {
+        // Safely get the resource provider value
+        return debugLogger.safeGet(params, 'row.resourceProvider', 'Unknown');
+      },
       renderCell: (params) => (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Avatar sx={{ width: 32, height: 32, bgcolor: 'primary.main' }}>
@@ -48,10 +54,10 @@ const Providers = () => {
           </Avatar>
           <Box>
             <Typography variant="body2" component="div">
-              {truncateAddress(params.value)}
+              {truncateAddress(debugLogger.safeGet(params, 'value', 'Unknown'))}
             </Typography>
             <Typography variant="caption" color="text.secondary">
-              {timeAgo(params.row.createdAt)}
+              {timeAgo(debugLogger.safeGet(params, 'row.createdAt', new Date()))}
             </Typography>
           </Box>
         </Box>
@@ -61,10 +67,15 @@ const Providers = () => {
       field: 'status',
       headerName: 'Status',
       width: 120,
+      valueGetter: (params) => {
+        // Safely get status or use a default
+        const state = debugLogger.safeGet(params, 'row.state', 0);
+        return getProviderStatus(state);
+      },
       renderCell: (params) => (
         <Chip
-          label={params.value}
-          color={getStatusColor(params.value)}
+          label={debugLogger.safeGet(params, 'value', 'Unknown')}
+          color={getStatusColor(debugLogger.safeGet(params, 'value', 'Unknown'))}
           size="small"
         />
       ),
@@ -73,48 +84,69 @@ const Providers = () => {
       field: 'gpu',
       headerName: 'GPU',
       width: 120,
-      valueGetter: (params) => params.row.spec.gpu || 0,
+      valueGetter: (params) => {
+        // Use safeGet to handle undefined params or params.row
+        return debugLogger.safeGet(params, 'row.spec.gpu', 0);
+      },
     },
     {
       field: 'gpuModel',
       headerName: 'GPU Model',
       flex: 1,
       minWidth: 180,
+      valueGetter: (params) => {
+        // Add valueGetter to safely extract GPU model
+        const gpus = debugLogger.safeGet(params, 'row.spec.gpus', []);
+        if (gpus.length > 0) {
+          return debugLogger.safeGet(gpus[0], 'name', 'Unknown GPU');
+        }
+        return 'No GPU';
+      },
     },
     {
       field: 'cpu',
       headerName: 'CPU (MHz)',
       width: 120,
-      valueGetter: (params) => params.row.spec.cpu || 0,
+      valueGetter: (params) => {
+        return debugLogger.safeGet(params, 'row.spec.cpu', 0);
+      },
     },
     {
       field: 'ram',
       headerName: 'RAM',
       width: 120,
-      valueGetter: (params) => formatBytes(params.row.spec.ram || 0),
+      valueGetter: (params) => {
+        return formatBytes(debugLogger.safeGet(params, 'row.spec.ram', 0));
+      },
     },
     {
       field: 'disk',
       headerName: 'Disk',
       width: 120,
-      valueGetter: (params) => formatBytes(params.row.spec.disk || 0),
+      valueGetter: (params) => {
+        return formatBytes(debugLogger.safeGet(params, 'row.spec.disk', 0));
+      },
     },
   ];
 
   // Transform data for the data grid
-  const rows = providers.map((provider, index) => {
-    const gpus = provider.resource_offer.spec.gpus || [];
+  const rows = providers ? providers.map((provider, index) => {
+    // Use safeGet for safe property access
+    const resourceOffer = debugLogger.safeGet(provider, 'resource_offer', {});
+    const spec = debugLogger.safeGet(resourceOffer, 'spec', {});
+    const gpus = debugLogger.safeGet(spec, 'gpus', []);
+    
     const gpuModel = gpus.length > 0 ? gpus[0].name : 'N/A';
     
     return {
       id: provider.id || index,
-      provider: provider.resource_offer.resource_provider,
-      status: getProviderStatus(provider.resource_offer.created_at),
-      createdAt: provider.resource_offer.created_at,
-      spec: provider.resource_offer.spec,
+      provider: debugLogger.safeGet(resourceOffer, 'resource_provider', 'Unknown'),
+      status: resourceOffer.created_at ? getProviderStatus(resourceOffer.created_at) : 'Unknown',
+      createdAt: resourceOffer.created_at || new Date().toISOString(),
+      spec: spec,
       gpuModel,
     };
-  });
+  }) : [];
 
   // Filter rows based on search term
   const filteredRows = searchTerm ? rows.filter(row => 

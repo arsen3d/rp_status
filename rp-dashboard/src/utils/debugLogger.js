@@ -125,7 +125,33 @@ export const debugLogger = {
   // Get all logs
   getLogs: () => {
     return JSON.parse(localStorage.getItem('errorLogs') || '[]');
-  }
+  },
+  
+  /**
+   * Safely access a nested property in an object without throwing errors
+   * @param {Object} obj - The object to check
+   * @param {String} path - The path to the property (e.g., 'resource_offer.spec.gpus')
+   * @param {*} defaultValue - The default value to return if the path doesn't exist
+   * @returns {*} The value at the path or the default value
+   */
+  safeGet: (obj, path, defaultValue = undefined) => {
+    if (!obj || !path) return defaultValue;
+    
+    const keys = path.split('.');
+    let result = obj;
+    
+    for (const key of keys) {
+      if (result === null || result === undefined || typeof result !== 'object') {
+        debugLogger.warn(`Attempted to access '${path}' but failed at '${key}'`, {
+          object: typeof obj === 'object' ? JSON.stringify(obj) : obj
+        });
+        return defaultValue;
+      }
+      result = result[key];
+    }
+    
+    return result !== undefined ? result : defaultValue;
+  },
 };
 
 // Add a global keyboard shortcut to show error overlay
