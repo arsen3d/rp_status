@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  rp-dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    restart: unless-stopped
+    # Uncomment and modify if you need environment variables
+    # environment:
+    #   - API_URL=http://your-api-server:port

@@ -5,6 +5,27 @@ import { debugLogger } from '../utils/debugLogger';
 // Mock API URL - to be replaced with actual API endpoint
 const API_URL = '/api';
 
+// Cache for sample data to avoid multiple downloads
+let sampleDataCache = null;
+
+// Function to get sample data - fetches only once and caches the result
+const getSampleData = async () => {
+  if (sampleDataCache) {
+    return sampleDataCache;
+  }
+  
+  try {
+    // const response = await axios.get('/sample.json');
+    const response = await axios.get('https://solver-testnet.lilypad.tech/api/v1/resource_offers?active=true');
+    
+    sampleDataCache = Array.isArray(response.data) ? response.data : [response.data];
+    return sampleDataCache;
+  } catch (error) {
+    console.error('Error fetching sample data:', error);
+    throw error;
+  }
+};
+
 // Service to handle API calls for resource provider data
 const ResourceProviderService = {
   // Get all resource providers
@@ -15,8 +36,8 @@ const ResourceProviderService = {
       // return response.data;
       
       // For now, we'll return mock data from the sample.json file
-      const response = await axios.get('/sample.json');
-      return Array.isArray(response.data) ? response.data : [response.data];
+      const providers = await getSampleData();
+      return providers;
     } catch (error) {
       console.error('Error fetching resource providers:', error);
       throw error;
@@ -31,8 +52,7 @@ const ResourceProviderService = {
       // return response.data;
       
       // For now, we'll filter the mock data
-      const response = await axios.get('/sample.json');
-      const providers = Array.isArray(response.data) ? response.data : [response.data];
+      const providers = await getSampleData();
       return providers.find(provider => provider.id === id);
     } catch (error) {
       console.error(`Error fetching resource provider ${id}:`, error);
@@ -48,8 +68,7 @@ const ResourceProviderService = {
       // return response.data;
       
       // For now, we'll filter the mock data
-      const response = await axios.get('/sample.json');
-      const providers = Array.isArray(response.data) ? response.data : [response.data];
+      const providers = await getSampleData();
       return providers.filter(provider => 
         provider.resource_offer.resource_provider === providerId
       );
@@ -67,8 +86,7 @@ const ResourceProviderService = {
       // return response.data;
       
       // For now, we'll extract hardware info from the mock data
-      const response = await axios.get('/sample.json');
-      const providers = Array.isArray(response.data) ? response.data : [response.data];
+      const providers = await getSampleData();
       
       // Log the first provider data to help with debugging
       if (providers.length > 0) {
@@ -103,8 +121,8 @@ const ResourceProviderService = {
       // return response.data;
       
       // For now, we'll return the mock data
-      const response = await axios.get('/sample.json');
-      return Array.isArray(response.data) ? response.data : [response.data];
+      const deals = await getSampleData();
+      return deals;
     } catch (error) {
       console.error('Error fetching deals:', error);
       throw error;
@@ -119,8 +137,7 @@ const ResourceProviderService = {
       // return response.data;
       
       // For now, we'll filter the mock data
-      const response = await axios.get('/sample.json');
-      const deals = Array.isArray(response.data) ? response.data : [response.data];
+      const deals = await getSampleData();
       return deals.find(deal => deal.deal_id === id);
     } catch (error) {
       console.error(`Error fetching deal ${id}:`, error);
@@ -136,8 +153,7 @@ const ResourceProviderService = {
       // return response.data;
       
       // For now, we'll calculate from the mock data
-      const response = await axios.get('/sample.json');
-      const providers = Array.isArray(response.data) ? response.data : [response.data];
+      const providers = await getSampleData();
       
       // Count unique resource providers
       const uniqueProviders = new Set();

@@ -49,10 +49,10 @@ axios.defaults.headers.post['Content-Type'] = 'application/json';
 const copySampleJson = async () => {
   try {
     // In a real app, you'd use an API. For this demo, we're ensuring the sample data is accessible
-    await fetch('/sample.json')
-      .catch(async () => {
-        debugLogger.warn('Checking sample.json availability...');
-      });
+    // await fetch('/sample.json')
+    //   .catch(async () => {
+    //     debugLogger.warn('Checking sample.json availability...');
+    //   });
   } catch (error) {
     debugLogger.error('Error checking sample.json:', error);
   }
@@ -61,7 +61,7 @@ const copySampleJson = async () => {
 // Initialize app
 const initApp = async () => {
   try {
-    await copySampleJson();
+    // await copySampleJson();
     
     createRoot(document.getElementById('root')).render(
       <StrictMode>
