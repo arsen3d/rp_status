@@ -2,7 +2,7 @@ import { Card, CardContent, Typography, Box, CircularProgress } from '@mui/mater
 
 const StatCard = ({ title, value, icon, color = 'primary' }) => {
   return (
-    <Card sx={{ height: '100%' }}>
+    <Card sx={{ height: '100%', width: '350px',   }}>
       <CardContent>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Box>

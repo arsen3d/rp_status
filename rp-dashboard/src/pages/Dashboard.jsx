@@ -29,43 +29,49 @@ const Dashboard = () => {
       ) : error ? (
         <Typography color="error">Error loading network stats</Typography>
       ) : (
-        <Grid container spacing={4}>
+        <div>
+        <Grid container spacing={4} sx={{ width: '100%', margin: 0 }}>
           {/* Stats Row */}
-          <Grid item xs={12} sm={6} md={3}>
-            <StatCard 
-              title="Active Providers" 
-              value={formatNumber(stats.providerCount)}
-              icon={<PeopleIcon />}
-              color="primary"
-            />
-          </Grid>
-          
-          <Grid item xs={12} sm={6} md={3}>
-            <StatCard 
-              title="Active Deals" 
-              value={formatNumber(stats.totalDeals)}
-              icon={<HandshakeIcon />}
-              color="success"
-            />
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <StatCard 
-              title="Total CPU Capacity" 
-              value={`${formatNumber(Math.round(stats.totalCPU / 1000))} GHz`}
-              icon={<MemoryIcon />}
-              color="warning"
-            />
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <StatCard 
-              title="Total Storage" 
-              value={formatBytes(stats.totalDisk)}
-              icon={<StorageIcon />}
-              color="info"
-            />
-          </Grid>
-
-          {/* Charts Row */}
+          {/* <Grid item xs={12}>
+             <Grid container spacing={4} sx={{ mt: 3 }}> */}
+              <Grid item xs={12} sm={6} md={3}>
+                <StatCard 
+                  title="Active Providers" 
+                  value={formatNumber(stats.providerCount)}
+                  icon={<PeopleIcon />}
+                  color="primary"
+                />
+              </Grid>
+              <Grid item xs={12} md={8}>
+                <StatCard 
+                  title="Active Deals" 
+                  value={formatNumber(stats.totalDeals)}
+                  icon={<HandshakeIcon />}
+                  color="success"
+                />
+              </Grid>
+                <Grid item xs={12} md={8}>
+                <StatCard 
+                  title="Total CPU Capacity" 
+                  value={`${formatNumber(Math.round(stats.totalCPU / 1000))} GHz`}
+                  icon={<MemoryIcon />}
+                  color="warning"
+                />
+              </Grid>
+              {/* <Grid item xs={12} sm={6} md={3}>
+                <StatCard 
+                  title="Total Storage" 
+                  value={formatBytes(stats.totalDisk)}
+                  icon={<StorageIcon />}
+                  color="info"
+                />
+              </Grid> */}
+            {/* </Grid>
+          </Grid> */}
+          {/* </Grid>
+          <Grid container spacing={4} sx={{ mt: 3 }}> */}
+            
+            {/* Charts Row */}
           <Grid item xs={12} md={8}>
             <Grid container spacing={3}>
               <Grid item xs={12}>
@@ -82,6 +88,7 @@ const Dashboard = () => {
             <RecentProviders />
           </Grid>
         </Grid>
+        </div>
       )}
     </Box>
   );

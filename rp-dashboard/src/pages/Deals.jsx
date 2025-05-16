@@ -202,7 +202,7 @@ const Deals = () => {
               />
             </Grid>
             <Grid item xs={12} md={3}>
-              <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
+              <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }} fullWidth>
                 <Button 
                   variant="outlined" 
                   startIcon={<FilterListIcon />}
@@ -217,9 +217,9 @@ const Deals = () => {
 
       <Grid container spacing={3}>
         {/* Deal Analytics */}
-        <Grid item xs={12}>
+        <Grid item xs={12} >
           <Card>
-            <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+            <Box sx={{ borderBottom: 1,  borderColor: 'divider' } }>
               <Tabs 
                 value={tabValue} 
                 onChange={handleTabChange}
@@ -231,7 +231,7 @@ const Deals = () => {
               </Tabs>
             </Box>
             <CardContent>
-              <Box sx={{ height: 300 }}>
+              <Box sx={{ height: 300, }}>
                 {tabValue === 0 && (
                   <LineChart
                     xAxis={[

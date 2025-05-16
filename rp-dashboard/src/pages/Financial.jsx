@@ -101,7 +101,7 @@ const Financial = () => {
                   series={[
                     {
                       data: financialData.revenue,
-                      label: 'Total Revenue (USD)',
+                      label: 'Total Revenue (LP)',
                       color: theme.palette.primary.main,
                     },
                   ]}
@@ -172,7 +172,7 @@ const Financial = () => {
                   series={[
                     {
                       data: financialData.topProviders.map(p => p.revenue),
-                      label: 'Revenue (USD)',
+                      label: 'Revenue (LP)',
                       color: theme.palette.success.light,
                     },
                   ]}
@@ -185,7 +185,7 @@ const Financial = () => {
         </Grid>
 
         {/* Price Models */}
-        <Grid item xs={12} md={6}>
+        {/* <Grid item xs={12} md={6}>
           <Card>
             <CardContent>
               <Typography variant="h6" gutterBottom>
@@ -249,7 +249,7 @@ const Financial = () => {
               </Box>
             </CardContent>
           </Card>
-        </Grid>
+        </Grid> */}
       </Grid>
     </Box>
   );

@@ -173,7 +173,7 @@ const MainLayout = ({ children }) => {
         
         <Divider />
         
-        <List>
+        {/* <List>
           <ListItem 
             button 
             onClick={() => {
@@ -186,7 +186,7 @@ const MainLayout = ({ children }) => {
             </ListItemIcon>
             <ListItemText primary="Debug Logs" />
           </ListItem>
-        </List>
+        </List> */}
       </Drawer>
 
       {/* Main content */}
