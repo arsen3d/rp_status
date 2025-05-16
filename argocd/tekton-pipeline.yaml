@@ -1,0 +1,66 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: docker-build-pipeline
+  namespace: rp-dashboard
+spec:
+  workspaces:
+    - name: shared-workspace
+  params:
+    - name: repo-url
+      type: string
+      description: The git repository URL to clone from
+    - name: branch-name
+      type: string
+      description: The git branch to clone
+      default: "main"
+    - name: image-name
+      type: string
+      description: The name of the image to build
+      default: "rp_status-rp-dashboard"
+    - name: image-tag
+      type: string
+      description: The tag for the built image
+      default: "latest"
+  tasks:
+    - name: fetch-repository
+      taskRef:
+        name: git-clone
+        kind: ClusterTask
+      workspaces:
+        - name: output
+          workspace: shared-workspace
+      params:
+        - name: url
+          value: $(params.repo-url)
+        - name: revision
+          value: $(params.branch-name)
+        - name: deleteExisting
+          value: "true"
+    - name: build-docker-image
+      taskRef:
+        name: kaniko
+        kind: ClusterTask
+      runAfter:
+        - fetch-repository
+      workspaces:
+        - name: source
+          workspace: shared-workspace
+      params:
+        - name: IMAGE
+          value: $(params.image-name):$(params.image-tag)
+        - name: DOCKERFILE
+          value: ./Dockerfile
+        - name: CONTEXT
+          value: .
+    - name: deploy-application
+      taskRef:
+        name: kubernetes-actions
+        kind: Task
+      runAfter:
+        - build-docker-image
+      params:
+        - name: script
+          value: |
+            kubectl apply -k ./argocd/
+            kubectl rollout restart deployment rp-dashboard -n rp-dashboard

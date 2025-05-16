@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-build-plugin
+  namespace: argocd
+  labels:
+    app.kubernetes.io/part-of: argocd
+data:
+  plugin.yaml: |
+    apiVersion: argoproj.io/v1alpha1
+    kind: ConfigManagementPlugin
+    metadata:
+      name: argocd-build-plugin
+    spec:
+      version: v1.0
+      generate:
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            set -e
+            
+            # Build the docker image
+            cd ${ARGOCD_APP_SOURCE_PATH}/..
+            echo "Building Docker image..."
+            docker build -t rp_status-rp-dashboard:latest .
+            
+            # Apply kustomization
+            cd ${ARGOCD_APP_SOURCE_PATH}
+            kubectl kustomize . > /tmp/manifests.yaml
+            cat /tmp/manifests.yaml

@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rp-dashboard
+  namespace: rp-dashboard
+  labels:
+    app: rp-dashboard
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rp-dashboard
+  template:
+    metadata:
+      labels:
+        app: rp-dashboard
+    spec:
+      containers:
+      - name: rp-dashboard
+        image: rp_status-rp-dashboard:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 80
+        resources:
+          limits:
+            cpu: "0.5"
+            memory: "512Mi"
+          requests:
+            cpu: "0.2"
+            memory: "256Mi"

@@ -1,0 +1,26 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  name: docker-build-pipeline-run
+  namespace: rp-dashboard
+spec:
+  pipelineRef:
+    name: docker-build-pipeline
+  workspaces:
+    - name: shared-workspace
+      volumeClaimTemplate:
+        spec:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 1Gi
+  params:
+    - name: repo-url
+      value: https://github.com/arsen3d/rp_status.git  # Replace with your actual Git repository URL
+    - name: branch-name
+      value: main
+    - name: image-name
+      value: rp_status-rp-dashboard
+    - name: image-tag
+      value: latest

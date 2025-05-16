@@ -1,0 +1,17 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: kubernetes-actions
+  namespace: rp-dashboard
+spec:
+  params:
+    - name: script
+      description: The script to run
+      type: string
+  steps:
+    - name: kubectl
+      image: bitnami/kubectl:latest
+      script: |
+        #!/bin/sh
+        set -e
+        $(params.script)

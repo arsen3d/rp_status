@@ -1,0 +1,18 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: rp-dashboard
+
+resources:
+- deployment.yaml
+- service.yaml
+- ingress.yaml
+- tekton-pipeline.yaml
+- tekton-tasks.yaml
+- tekton-pipelinerun.yaml
+- argocd-build-plugin.yaml
+
+commonLabels:
+  app: rp-dashboard
+  part-of: rp-status
+  managed-by: argocd
