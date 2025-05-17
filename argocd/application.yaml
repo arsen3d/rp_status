@@ -15,11 +15,16 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/arsen3d/rp_status.git  # Replace with your actual Git repository URL
+    repoURL: https://github.com/arsen3d/rp_status.git
     targetRevision: HEAD
     path: argocd
     plugin:
       name: timestamp-plugin
+    # Make argocd track the commit hash
+    helm:
+      parameters:
+        - name: git.revision
+          value: ""  # This will be populated by the plugin from the actual commit
   destination:
     server: https://kubernetes.default.svc
     namespace: lilypad

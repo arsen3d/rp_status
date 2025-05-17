@@ -40,17 +40,31 @@ spec:
           echo "Repository cloned successfully at commit $GIT_COMMIT_HASH"
           # Save commit hash to a file for other containers to use
           echo $GIT_COMMIT_HASH > /workspace/commit_hash
+          # Update the environment for the other containers
+          echo "export GIT_COMMIT_HASH=$GIT_COMMIT_HASH" > /workspace/git_env
         volumeMounts:
         - name: workspace-volume
           mountPath: /workspace
       - name: build-container
         image: gcr.io/kaniko-project/executor:latest
-        args:
-        - "--dockerfile=/workspace/Dockerfile"
-        - "--context=dir:///workspace"
-        - "--no-push"
-        - "--tarPath=/workspace/image.tar"
-        - "--destination=localhost:5000/rp_status-rp-dashboard:latest"
+        command:
+        - /bin/sh
+        - -c
+        - |
+          # Load the git environment
+          if [ -f /workspace/git_env ]; then
+            source /workspace/git_env
+            echo "Building image for commit: $GIT_COMMIT_HASH"
+          fi
+          
+          # Use Kaniko to build the image
+          /kaniko/executor \
+            --dockerfile=/workspace/Dockerfile \
+            --context=dir:///workspace \
+            --no-push \
+            --tarPath=/workspace/image.tar \
+            --destination=localhost:5000/rp_status-rp-dashboard:latest \
+            --label=git.commit="$GIT_COMMIT_HASH"
         volumeMounts:
         - name: workspace-volume
           mountPath: /workspace
