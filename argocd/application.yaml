@@ -12,7 +12,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/arsen3d/rp_status.git  # Replace with your actual Git repository URL
-    targetRevision: HEAD
+    targetRevision: main
     path: argocd
     plugin:
       name: argocd-build-plugin
