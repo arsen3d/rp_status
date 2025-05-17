@@ -29,11 +29,11 @@ spec:
       labels:
         app: rp-dashboard
         # Add a unique label using git commit hash to force update without disrupting service
-        revision: "{{- if .Values.git.revision }}{{ regexReplaceAll \"[^-a-zA-Z0-9_.]\" .Values.git.revision \"\" }}{{- else }}unknown{{- end }}"
+        revision: "rev-clean-commit"
       annotations:
         # These annotations trigger a rolling update when changed
-        kubectl.kubernetes.io/restartedAt: "{{.Values.timestamp}}"
-        git-commit: "{{- if .Values.git.revision }}{{ .Values.git.revision }}{{- else }}unknown{{- end }}"
+        kubectl.kubernetes.io/restartedAt: "timestamp-placeholder"
+        git-commit: "rev-git-commit"
     spec:
       # Give pods time to gracefully terminate
       terminationGracePeriodSeconds: 30
