@@ -16,4 +16,4 @@ spec:
           service:
             name: rp-dashboard
             port:
-              number: 80
+              number: 8090
