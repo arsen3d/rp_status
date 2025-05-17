@@ -7,7 +7,7 @@ metadata:
     app: rp-dashboard
   annotations:
     argocd.argoproj.io/compare-options: IgnoreResourceVersion,IgnoreResourceStatusField
-    argocd.argoproj.io/sync-options: Prune=false,SkipDryRunOnMissingResource=true,FieldManager=argocd-deploy,Replace=true,Force=true
+    argocd.argoproj.io/sync-options: Prune=false,SkipDryRunOnMissingResource=true,FieldManager=argocd-deploy,Force=true
     argocd.argoproj.io/sync-wave: "1"
     # argocd.argoproj.io/sync-options: Replace=true,Force=true
     # Use the git commit hash to force redeploy on every sync
