@@ -107,15 +107,12 @@ spec:
             echo "Updating deployment configuration to use registry image..."
             REGISTRY_IMAGE="$(params.registry-url)/$(params.image-name):latest"
             
-            # Use a more targeted sed that only updates the image field in the container spec
-            # This avoids changing the immutable selector field
-            sed -i "/^ *image: /s|image:.*|image: ${REGISTRY_IMAGE}|g" ./argocd/deployment.yaml
-            sed -i "/^ *imagePullPolicy: /s|imagePullPolicy:.*|imagePullPolicy: Always|g" ./argocd/deployment.yaml
+            # Use strategic merge patch to update only the image
+            kubectl patch deployment rp-dashboard -n lilypad --patch "{\"spec\":{\"template\":{\"spec\":{\"containers\":[{\"name\":\"rp-dashboard\",\"image\":\"${REGISTRY_IMAGE}\"}]}}}}" --type=strategic || true
             
-            # Add a timestamp annotation to force redeployment
+            # Add a timestamp annotation to force redeployment (using a different patch to avoid issues)
             echo "Adding timestamp annotation to deployment..."
-            kubectl patch deployment rp-dashboard -n lilypad --type=json \
-              -p="[{\"op\": \"replace\", \"path\": \"/metadata/annotations/tekton.dev~1lastBuilt\", \"value\": \"${TIMESTAMP}\"}]" || true
+            kubectl patch deployment rp-dashboard -n lilypad --patch "{\"metadata\":{\"annotations\":{\"tekton.dev/lastBuilt\":\"${TIMESTAMP}\"}}}" --type=strategic || true
             
             # Create registry credentials if needed
             if [[ "$(params.registry-url)" != *"localhost"* && "$(params.registry-url)" != *"127.0.0.1"* ]]; then

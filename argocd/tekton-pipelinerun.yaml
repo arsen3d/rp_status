@@ -1,7 +1,7 @@
 apiVersion: tekton.dev/v1beta1
 kind: PipelineRun
 metadata:
-  name: docker-build-pipeline-run
+  generateName: docker-build-pipeline-run-
   namespace: lilypad
 spec:
   pipelineRef:

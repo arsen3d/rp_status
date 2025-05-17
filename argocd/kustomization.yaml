@@ -9,7 +9,7 @@ resources:
 # - ingress.yaml
 - tekton-pipeline.yaml
 - tekton-tasks.yaml
-- tekton-pipelinerun.yaml
+# - tekton-pipelinerun.yaml  # Commented out as PipelineRuns are managed by the build plugin
 - argocd-build-plugin.yaml
 
 commonLabels:
