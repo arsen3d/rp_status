@@ -9,9 +9,9 @@ metadata:
     argocd.argoproj.io/compare-options: IgnoreResourceVersion,IgnoreResourceStatusField
     argocd.argoproj.io/sync-options: Prune=false,SkipDryRunOnMissingResource=true,FieldManager=argocd-deploy,Replace=true
     argocd.argoproj.io/sync-wave: "1"
-    # Use the UNIX timestamp to force redeploy on every sync
-    kubectl.kubernetes.io/restartedAt: "$(date +%s)"
-    force-recreate: "$(date +%Y%m%d%H%M%S)"
+    # Use the git commit hash to force redeploy on every sync
+    git-commit: "${GIT_COMMIT_HASH}"
+    force-recreate: "${GIT_COMMIT_HASH}"
 spec:
   replicas: 1
   selector:
