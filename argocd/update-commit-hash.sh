@@ -25,9 +25,13 @@ fi
 
 CURRENT_TIMESTAMP="$(date -u +%FT%TZ)"
 
+# Clean the commit hash to ensure it's a valid Kubernetes label
+# Only allow alphanumeric characters, '-', '_', or '.'
+CLEAN_COMMIT_HASH=$(echo "$COMMIT_HASH" | tr -cd 'a-zA-Z0-9-_.')
+
 # Update the configmap with the commit hash and timestamp
-echo "Updating configmap with commit hash: $COMMIT_HASH and timestamp: $CURRENT_TIMESTAMP"
-kubectl patch configmap build-info -n lilypad --type=merge -p "{\"data\":{\"git_commit\":\"$COMMIT_HASH\",\"current_timestamp\":\"$CURRENT_TIMESTAMP\"}}" || true
+echo "Updating configmap with commit hash: $CLEAN_COMMIT_HASH and timestamp: $CURRENT_TIMESTAMP"
+kubectl patch configmap build-info -n lilypad --type=merge -p "{\"data\":{\"git_commit\":\"$CLEAN_COMMIT_HASH\",\"current_timestamp\":\"$CURRENT_TIMESTAMP\"}}" || true
 
 # Apply the pod disruption budget first
 echo "Ensuring PodDisruptionBudget is in place..."
@@ -62,16 +66,16 @@ kubectl patch deployment rp-dashboard -n lilypad --type=merge -p '{
 }' || true
 
 # Update the deployment with new revision label to trigger rolling update
-echo "Updating deployment with new revision label: $COMMIT_HASH"
+echo "Updating deployment with new revision label: $CLEAN_COMMIT_HASH"
 kubectl patch deployment rp-dashboard -n lilypad --type=strategic --patch "{
   \"spec\": {
     \"template\": {
       \"metadata\": {
         \"labels\": {
-          \"revision\": \"$COMMIT_HASH\"
+          \"revision\": \"$CLEAN_COMMIT_HASH\"
         },
         \"annotations\": {
-          \"git-commit\": \"$COMMIT_HASH\",
+          \"git-commit\": \"$CLEAN_COMMIT_HASH\",
           \"kubectl.kubernetes.io/restartedAt\": \"$CURRENT_TIMESTAMP\"
         }
       }
@@ -81,30 +85,3 @@ kubectl patch deployment rp-dashboard -n lilypad --type=strategic --patch "{
 
 echo "Update complete! ArgoCD will now manage the rollout with zero downtime."
 exit 0
-
-while true; do
-  READY_REPLICAS=$(kubectl get deployment rp-dashboard -n lilypad -o jsonpath='{.status.readyReplicas}' 2>/dev/null || echo "0")
-  
-  if [ "$READY_REPLICAS" -ge "$NEW_REPLICAS" ]; then
-    echo "All pods are ready ($READY_REPLICAS/$NEW_REPLICAS)"
-    break
-  fi
-  
-  CURRENT_TIME=$(date +%s)
-  ELAPSED_TIME=$((CURRENT_TIME - START_TIME))
-  
-  if [ $ELAPSED_TIME -gt $TIMEOUT ]; then
-    echo "Timeout waiting for pods to become ready"
-    echo "Continuing anyway, but deployment might not be complete"
-    break
-  fi
-  
-  echo "Waiting for pods to become ready ($READY_REPLICAS/$NEW_REPLICAS)... Elapsed time: ${ELAPSED_TIME}s"
-  sleep 5
-done
-
-# 5. Return to original replica count after new pods are ready
-echo "Scaling back down to original replica count: $REPLICAS"
-kubectl scale deployment rp-dashboard -n lilypad --replicas=$REPLICAS || true
-
-echo "Update completed successfully"
