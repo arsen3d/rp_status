@@ -19,22 +19,103 @@ spec:
 apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
-  name: setup-registry
+  name: docker-build-and-load
   namespace: lilypad
 spec:
+  workspaces:
+    - name: source
+  params:
+    - name: image-name
+      description: The name of the image to build
+      type: string
+    - name: image-tag
+      description: The tag for the built image
+      type: string
+    - name: context
+      description: The context directory
+      type: string
+      default: "."
+    - name: dockerfile
+      description: The path to the Dockerfile
+      type: string
+      default: "./Dockerfile"
   steps:
-    - name: create-registry
-      image: docker:dind
+    - name: build-and-load
+      image: docker:24.0-dind
       securityContext:
         privileged: true
+      volumeMounts:
+        - mountPath: /var/lib/docker
+          name: docker-storage
       script: |
         #!/bin/sh
         set -e
-        # Check if registry container is already running
-        if ! docker ps | grep -q registry; then
-          echo "Setting up local Docker registry..."
-          docker run -d -p 5000:5000 --restart=always --name registry registry:2
-          echo "Local Docker registry is running at localhost:5000"
-        else
-          echo "Local Docker registry is already running"
-        fi
+        cd $(workspaces.source.path)/$(params.context)
+        
+        # Start Docker daemon
+        dockerd-entrypoint.sh &
+        sleep 10  # Give Docker time to start
+        
+        # Build the Docker image
+        echo "Building Docker image $(params.image-name):$(params.image-tag)..."
+        docker build -t $(params.image-name):$(params.image-tag) -f $(params.dockerfile) .
+        
+        # Save the image to a tar file
+        echo "Saving image to tar file..."
+        docker save $(params.image-name):$(params.image-tag) -o /tmp/image.tar
+        
+        # Copy the image to minikube
+        echo "Transferring image to minikube..."
+        # This uses a trick where we output the tar file and the next step can use it
+        cat /tmp/image.tar > /workspace/image.tar
+        
+    - name: load-to-minikube
+      image: bitnami/kubectl:latest
+      volumeMounts:
+        - mountPath: /var/lib/docker
+          name: docker-storage
+      script: |
+        #!/bin/sh
+        set -e
+        
+        # Transfer the tar to minikube and load it
+        echo "Loading image into minikube..."
+        
+        # Create a helper pod to load the image
+        cat <<EOF | kubectl apply -f -
+        apiVersion: v1
+        kind: Pod
+        metadata:
+          name: image-loader
+          namespace: lilypad
+        spec:
+          containers:
+          - name: loader
+            image: docker:24.0
+            command: ["sleep", "600"]
+            volumeMounts:
+            - name: docker-socket
+              mountPath: /var/run/docker.sock
+            - name: image-tar
+              mountPath: /tmp/image.tar
+              subPath: image.tar
+          volumes:
+          - name: docker-socket
+            hostPath:
+              path: /var/run/docker.sock
+          - name: image-tar
+            hostPath:
+              path: /workspace/image.tar
+        EOF
+        
+        # Wait for the pod to be ready
+        kubectl wait --for=condition=Ready pod/image-loader -n lilypad --timeout=60s
+        
+        # Load the image in minikube
+        kubectl exec -n lilypad image-loader -- docker load -i /tmp/image.tar
+        
+        # Clean up
+        kubectl delete pod image-loader -n lilypad
+  volumes:
+    - name: docker-storage
+      emptyDir: {}

@@ -17,8 +17,8 @@ spec:
     spec:
       containers:
       - name: rp-dashboard
-        image: localhost:5000/rp_status-rp-dashboard:latest
-        imagePullPolicy: Always
+        image: rp_status-rp-dashboard:latest
+        imagePullPolicy: Never
         ports:
         - containerPort: 80
         resources:

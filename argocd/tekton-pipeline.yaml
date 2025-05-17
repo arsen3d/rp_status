@@ -17,24 +17,17 @@ spec:
     - name: image-name
       type: string
       description: The name of the image to build
-      default: "localhost:5000/rp_status-rp-dashboard"
+      default: "rp_status-rp-dashboard"
     - name: image-tag
       type: string
       description: The tag for the built image
       default: "latest"
   tasks:
-    - name: setup-local-registry
-      taskRef:
-        name: setup-registry
-        kind: Task
-        apiVersion: tekton.dev/v1beta1
     - name: fetch-repository
       taskRef:
         name: git-clone
         kind: ClusterTask
         apiVersion: tekton.dev/v1beta1
-      runAfter:
-        - setup-local-registry
       workspaces:
         - name: output
           workspace: shared-workspace
@@ -47,8 +40,8 @@ spec:
           value: "true"
     - name: build-docker-image
       taskRef:
-        name: kaniko
-        kind: ClusterTask
+        name: docker-build-and-load
+        kind: Task
         apiVersion: tekton.dev/v1beta1
       runAfter:
         - fetch-repository
@@ -56,12 +49,14 @@ spec:
         - name: source
           workspace: shared-workspace
       params:
-        - name: IMAGE
-          value: $(params.image-name):$(params.image-tag)
-        - name: DOCKERFILE
-          value: ./Dockerfile
-        - name: CONTEXT
+        - name: image-name
+          value: $(params.image-name)
+        - name: image-tag
+          value: $(params.image-tag)
+        - name: context
           value: .
+        - name: dockerfile
+          value: ./Dockerfile
     - name: deploy-application
       taskRef:
         name: kubernetes-actions

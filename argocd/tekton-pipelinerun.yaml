@@ -21,6 +21,6 @@ spec:
     - name: branch-name
       value: main
     - name: image-name
-      value: localhost:5000/rp_status-rp-dashboard
+      value: rp_status-rp-dashboard
     - name: image-tag
       value: latest
