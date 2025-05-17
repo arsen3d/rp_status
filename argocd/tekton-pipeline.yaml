@@ -27,6 +27,7 @@ spec:
       taskRef:
         name: git-clone
         kind: ClusterTask
+        apiVersion: tekton.dev/v1beta1
       workspaces:
         - name: output
           workspace: shared-workspace
@@ -41,6 +42,7 @@ spec:
       taskRef:
         name: kaniko
         kind: ClusterTask
+        apiVersion: tekton.dev/v1beta1
       runAfter:
         - fetch-repository
       workspaces:
@@ -57,6 +59,7 @@ spec:
       taskRef:
         name: kubernetes-actions
         kind: Task
+        apiVersion: tekton.dev/v1beta1
       runAfter:
         - build-docker-image
       params:
