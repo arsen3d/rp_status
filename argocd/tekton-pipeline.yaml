@@ -2,7 +2,7 @@ apiVersion: tekton.dev/v1beta1
 kind: Pipeline
 metadata:
   name: docker-build-pipeline
-  namespace: rp-dashboard
+  namespace: lilypad
 spec:
   workspaces:
     - name: shared-workspace

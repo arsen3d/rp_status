@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: rp-dashboard
-  namespace: rp-dashboard
+  namespace: lilypad
   labels:
     app: rp-dashboard
 spec:

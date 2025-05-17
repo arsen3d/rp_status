@@ -2,7 +2,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: rp-dashboard
-  namespace: rp-dashboard
+  namespace: lilypad
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
 spec:

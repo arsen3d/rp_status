@@ -2,7 +2,7 @@ apiVersion: tekton.dev/v1beta1
 kind: PipelineRun
 metadata:
   name: docker-build-pipeline-run
-  namespace: rp-dashboard
+  namespace: lilypad
 spec:
   pipelineRef:
     name: docker-build-pipeline
