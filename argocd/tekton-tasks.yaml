@@ -69,6 +69,9 @@ spec:
         # This uses a trick where we output the tar file and the next step can use it
         cat /tmp/image.tar > /workspace/image.tar
         
+        # Print success message
+        echo "Image built successfully and saved for loading into minikube"
+        
     - name: load-to-minikube
       image: bitnami/kubectl:latest
       volumeMounts:
@@ -112,9 +115,15 @@ spec:
         kubectl wait --for=condition=Ready pod/image-loader -n lilypad --timeout=60s
         
         # Load the image in minikube
+        echo "Running docker load command in the helper pod..."
         kubectl exec -n lilypad image-loader -- docker load -i /tmp/image.tar
         
+        # Verify the image is loaded
+        echo "Verifying image is loaded in minikube..."
+        kubectl exec -n lilypad image-loader -- docker images | grep $(params.image-name)
+        
         # Clean up
+        echo "Cleaning up the helper pod..."
         kubectl delete pod image-loader -n lilypad
   volumes:
     - name: docker-storage
@@ -159,12 +168,34 @@ spec:
         set -e
         
         # Start Docker daemon
+        echo "Starting Docker daemon..."
         dockerd-entrypoint.sh &
         sleep 10  # Give Docker time to start
+        
+        # Echo parameters for debugging
+        echo "Parameters:"
+        echo "- Image name: $(params.image-name)"
+        echo "- Image tag: $(params.image-tag)"
+        echo "- Registry URL: $(params.registry-url)"
+        
+        # Check if we're using minikube's local registry
+        if [[ "$(params.registry-url)" == *"localhost"* || "$(params.registry-url)" == *"127.0.0.1"* ]]; then
+          echo "Using local minikube environment, skipping actual push to registry."
+          echo "The image will be loaded directly into minikube."
+          exit 0
+        fi
+        
+        # For external registries, continue with normal push process
         
         # Load the image from the previous step
         echo "Loading Docker image from previous step..."
         docker load -i /workspace/image.tar
+        
+        # Validate registry URL format
+        if [ -z "$(params.registry-url)" ]; then
+          echo "ERROR: Registry URL is empty. Please provide a valid registry URL."
+          exit 1
+        fi
         
         # Tag the image with the registry URL
         REGISTRY_IMAGE="$(params.registry-url)/$(params.image-name):$(params.image-tag)"

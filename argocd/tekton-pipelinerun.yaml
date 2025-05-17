@@ -25,7 +25,7 @@ spec:
     - name: image-tag
       value: latest
     - name: registry-url
-      value: localhost:5000  # Replace with your actual registry URL
+      value: "10.106.91.185:5000"  # Internal cluster registry URL
     - name: registry-user
       value: ""  # Replace if needed
     - name: registry-password

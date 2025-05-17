@@ -100,8 +100,10 @@ spec:
       params:
         - name: script
           value: |
-            # Set the registry URL in the deployment
-            sed -i "s|\${REGISTRY_URL}|$(params.registry-url)|g" ./argocd/deployment.yaml
+            # Since we're using the image built directly in minikube, we don't need to use registry URL
+            echo "Updating deployment configuration to use local image..."
+            sed -i "s|image:.*|image: rp_status-rp-dashboard:latest|g" ./argocd/deployment.yaml
+            sed -i "s|imagePullPolicy:.*|imagePullPolicy: Never|g" ./argocd/deployment.yaml
             
             # Create registry credentials if provided
             if [ -n "$(params.registry-user)" ] && [ -n "$(params.registry-password)" ]; then
@@ -112,13 +114,18 @@ spec:
                 --docker-password=$(params.registry-password) \
                 --namespace=lilypad \
                 --dry-run=client -o yaml | kubectl apply -f -
+            else
+              echo "Warning: No registry credentials provided."
             fi
             
             # Apply the Kubernetes resources
+            echo "Applying Kubernetes resources..."
             kubectl apply -k ./argocd/
             
             # Restart the deployment to ensure it picks up the new image
+            echo "Restarting deployment..."
             kubectl rollout restart deployment rp-dashboard -n lilypad
             
             # Monitor rollout status
+            echo "Monitoring rollout status..."
             kubectl rollout status deployment rp-dashboard -n lilypad --timeout=60s
