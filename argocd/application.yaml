@@ -14,20 +14,16 @@ spec:
     repoURL: https://github.com/arsen3d/rp_status.git  # Replace with your actual Git repository URL
     targetRevision: HEAD
     path: argocd
-    plugin:
-      name: argocd-build-plugin
   destination:
     server: https://kubernetes.default.svc
     namespace: lilypad
   syncPolicy:
     automated:
-      prune: false  # Changed to false to prevent deletion of resources
+      prune: true  # Changed to true to ensure resources are properly managed
       selfHeal: true
       allowEmpty: false
     syncOptions:
       - CreateNamespace=true
-      - RespectIgnoreDifferences=true
-      - ApplyOutOfSyncOnly=true
       - ServerSideApply=true  # Added for more controlled apply
       - FieldManager=argocd  # Control the field manager
       - IgnoreResourceVersion=true  # Ignore resource version differences
