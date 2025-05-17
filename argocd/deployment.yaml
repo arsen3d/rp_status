@@ -8,6 +8,7 @@ metadata:
   annotations:
     argocd.argoproj.io/compare-options: IgnoreResourceVersion,IgnoreResourceStatusField
     argocd.argoproj.io/sync-options: Prune=false,SkipDryRunOnMissingResource=true,FieldManager=argocd-deploy
+    argocd.argoproj.io/hook: Sync
 spec:
   replicas: 1
   selector:
