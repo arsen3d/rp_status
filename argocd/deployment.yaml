@@ -23,7 +23,7 @@ spec:
     spec:
       containers:
       - name: rp-dashboard
-        image: 10.104.93.56:5000/rp_status-rp-dashboard:latest
+        image: app-registry:5000/rp_status-rp-dashboard:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 80
