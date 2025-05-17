@@ -7,10 +7,10 @@ resources:
 - deployment.yaml
 - service.yaml
 # - ingress.yaml
-- tekton-pipeline.yaml
-- tekton-tasks.yaml
+# - tekton-pipeline.yaml
+# - tekton-tasks.yaml
 # - tekton-pipelinerun.yaml  # Cannot be used with kustomize due to generateName
-- argocd-build-plugin.yaml
+# - argocd-build-plugin.yaml
 
 # Remove labels entirely to avoid any potential problems with selectors
 # labels:
