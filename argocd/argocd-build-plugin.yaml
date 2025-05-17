@@ -56,7 +56,7 @@ data:
                 - name: image-tag
                   value: latest
                 - name: registry-url
-                  value: "10.106.91.185:5000"
+                  value: "registry:5000"
                 - name: registry-user
                   value: ""
                 - name: registry-password
