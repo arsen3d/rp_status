@@ -10,8 +10,8 @@ metadata:
     argocd.argoproj.io/sync-options: Prune=false,SkipDryRunOnMissingResource=true,FieldManager=argocd-deploy,Validate=false,RespectIgnoreDifferences=true
     argocd.argoproj.io/sync-wave: "1"
     # Use the git commit hash to trigger updates without completely replacing the deployment
-    git-commit: "{{.Values.git.revision}}"
-    revision: "{{.Values.git.revision}}"
+    git-commit: "{{- if .Values.git.revision }}{{ .Values.git.revision }}{{- else }}unknown{{- end }}"
+    revision: "{{- if .Values.git.revision }}{{ regexReplaceAll \"[^-a-zA-Z0-9_.]\" .Values.git.revision \"\" }}{{- else }}unknown{{- end }}"
 spec:
   replicas: 1
   # Ensure pods are recreated in a controlled way
@@ -29,11 +29,11 @@ spec:
       labels:
         app: rp-dashboard
         # Add a unique label using git commit hash to force update without disrupting service
-        revision: "{{.Values.git.revision}}"
+        revision: "{{- if .Values.git.revision }}{{ regexReplaceAll \"[^-a-zA-Z0-9_.]\" .Values.git.revision \"\" }}{{- else }}unknown{{- end }}"
       annotations:
         # These annotations trigger a rolling update when changed
         kubectl.kubernetes.io/restartedAt: "{{.Values.timestamp}}"
-        git-commit: "{{.Values.git.revision}}"
+        git-commit: "{{- if .Values.git.revision }}{{ .Values.git.revision }}{{- else }}unknown{{- end }}"
     spec:
       # Give pods time to gracefully terminate
       terminationGracePeriodSeconds: 30
