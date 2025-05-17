@@ -77,13 +77,6 @@ const GpuDistribution = () => {
                     transform: 'rotate(-45)',
                     dominantBaseline: 'central',
                   },
-                  tickLabelStyle: {
-                    fontSize: 0,
-                    
-                    textAnchor: 'end',
-                    transform: 'rotate(-45)',
-                    dominantBaseline: 'central',
-                  },
                   tickSize: 0,
                 },
               ]}
