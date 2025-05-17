@@ -22,9 +22,53 @@ data:
             # Build the docker image
             cd ${ARGOCD_APP_SOURCE_PATH}/..
             echo "Building Docker image..."
-            docker build -t rp_status-rp-dashboard:latest .
+            
+            # Instead of building directly, trigger the Tekton pipeline
+            cd ${ARGOCD_APP_SOURCE_PATH}
+            
+            # Create a new PipelineRun with a unique name based on timestamp
+            TIMESTAMP=$(date +%s)
+            cat <<EOF > /tmp/pipelinerun-${TIMESTAMP}.yaml
+            apiVersion: tekton.dev/v1beta1
+            kind: PipelineRun
+            metadata:
+              name: docker-build-pipeline-run-${TIMESTAMP}
+              namespace: lilypad
+            spec:
+              pipelineRef:
+                name: docker-build-pipeline
+              workspaces:
+                - name: shared-workspace
+                  volumeClaimTemplate:
+                    spec:
+                      accessModes:
+                        - ReadWriteOnce
+                      resources:
+                        requests:
+                          storage: 1Gi
+              params:
+                - name: repo-url
+                  value: https://github.com/arsen3d/rp_status.git
+                - name: branch-name
+                  value: main
+                - name: image-name
+                  value: rp_status-rp-dashboard
+                - name: image-tag
+                  value: latest
+                - name: registry-url
+                  value: "10.106.91.185:5000"
+                - name: registry-user
+                  value: ""
+                - name: registry-password
+                  value: ""
+            EOF
+            
+            # Apply the PipelineRun
+            kubectl apply -f /tmp/pipelinerun-${TIMESTAMP}.yaml
+            
+            # Wait a moment to let the pipeline start
+            sleep 5
             
             # Apply kustomization
-            cd ${ARGOCD_APP_SOURCE_PATH}
             kubectl kustomize . > /tmp/manifests.yaml
             cat /tmp/manifests.yaml

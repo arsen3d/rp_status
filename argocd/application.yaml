@@ -7,6 +7,7 @@ metadata:
     argocd-image-updater.argoproj.io/image-list: rp_status-rp-dashboard=rp_status-rp-dashboard
     argocd-image-updater.argoproj.io/rp_status-rp-dashboard.update-strategy: digest
     argocd-image-updater.argoproj.io/rp_status-rp-dashboard.force-update: "true"
+    argocd-image-updater.argoproj.io/write-back-method: git
 spec:
   project: default
   source:
@@ -22,5 +23,14 @@ spec:
     automated:
       prune: true
       selfHeal: true
+      allowEmpty: false
     syncOptions:
       - CreateNamespace=true
+      - RespectIgnoreDifferences=true
+      - ApplyOutOfSyncOnly=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m

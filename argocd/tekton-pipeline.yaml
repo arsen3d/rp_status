@@ -100,10 +100,18 @@ spec:
       params:
         - name: script
           value: |
+            # Generate a timestamp for this deployment
+            TIMESTAMP=$(date +%s)
+            
             # Since we're using the image built directly in minikube, we don't need to use registry URL
             echo "Updating deployment configuration to use local image..."
             sed -i "s|image:.*|image: rp_status-rp-dashboard:latest|g" ./argocd/deployment.yaml
-            sed -i "s|imagePullPolicy:.*|imagePullPolicy: Never|g" ./argocd/deployment.yaml
+            sed -i "s|imagePullPolicy:.*|imagePullPolicy: Always|g" ./argocd/deployment.yaml
+            
+            # Add a timestamp annotation to force redeployment
+            echo "Adding timestamp annotation to deployment..."
+            kubectl patch deployment rp-dashboard -n lilypad --type=json \
+              -p="[{\"op\": \"replace\", \"path\": \"/metadata/annotations/tekton.dev~1lastBuilt\", \"value\": \"${TIMESTAMP}\"}]"
             
             # Create registry credentials if provided
             if [ -n "$(params.registry-user)" ] && [ -n "$(params.registry-password)" ]; then
