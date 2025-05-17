@@ -18,6 +18,8 @@ spec:
     repoURL: https://github.com/arsen3d/rp_status.git  # Replace with your actual Git repository URL
     targetRevision: HEAD
     path: argocd
+    plugin:
+      name: timestamp-plugin
   destination:
     server: https://kubernetes.default.svc
     namespace: lilypad

@@ -9,9 +9,9 @@ metadata:
     argocd.argoproj.io/compare-options: IgnoreResourceVersion,IgnoreResourceStatusField
     argocd.argoproj.io/sync-options: Prune=false,SkipDryRunOnMissingResource=true,FieldManager=argocd-deploy,Replace=true
     argocd.argoproj.io/sync-wave: "1"
-    kubectl.kubernetes.io/restartedAt: '{{ now | date "2006-01-02T15:04:05Z07:00" }}'
-    force-recreate: '{{ randAlphaNum 10 }}'
-    generated-timestamp: '{{ now | date "20060102150405" }}'
+    # Use the UNIX timestamp to force redeploy on every sync
+    kubectl.kubernetes.io/restartedAt: "$(date +%s)"
+    force-recreate: "$(date +%Y%m%d%H%M%S)"
 spec:
   replicas: 1
   selector:
@@ -22,8 +22,8 @@ spec:
       labels:
         app: rp-dashboard
       annotations:
-        kubectl.kubernetes.io/restartedAt: '{{ now | date "2006-01-02T15:04:05Z07:00" }}'
-        force-redeploy: '{{ randAlphaNum 10 }}'
+        kubectl.kubernetes.io/restartedAt: "$(date +%s)"
+        git-commit: "${GIT_COMMIT_HASH}"
     spec:
       initContainers:
       - name: git-clone
@@ -35,7 +35,11 @@ spec:
           # Clone the application repository
           cd /workspace
           git clone https://github.com/arsen3d/rp_status.git .
-          echo "Repository cloned successfully"
+          # Get the commit hash and save it for reference
+          export GIT_COMMIT_HASH=$(git rev-parse HEAD)
+          echo "Repository cloned successfully at commit $GIT_COMMIT_HASH"
+          # Save commit hash to a file for other containers to use
+          echo $GIT_COMMIT_HASH > /workspace/commit_hash
         volumeMounts:
         - name: workspace-volume
           mountPath: /workspace
@@ -88,11 +92,27 @@ spec:
         image: localhost:5000/rp_status-rp-dashboard:latest
         imagePullPolicy: Never
         env:
-        - name: BUILD_ID
+        - name: GIT_COMMIT
           valueFrom:
             configMapKeyRef:
               name: build-info
-              key: build_id
+              key: git_commit
+        - name: REPO_URL
+          valueFrom:
+            configMapKeyRef:
+              name: build-info
+              key: repo_url
+        command:
+        - /bin/sh
+        - -c
+        - |
+          # Get the commit hash from the file
+          if [ -f /workspace/commit_hash ]; then
+            export COMMIT=$(cat /workspace/commit_hash)
+            echo "Running with commit: $COMMIT"
+          fi
+          # Start the nginx server
+          nginx -g "daemon off;"
         ports:
         - containerPort: 80
         resources:
@@ -102,6 +122,10 @@ spec:
           requests:
             cpu: "0.2"
             memory: "256Mi"
+        volumeMounts:
+        - name: workspace-volume
+          mountPath: /workspace
+          readOnly: true
       volumes:
       - name: workspace-volume
         emptyDir: {}

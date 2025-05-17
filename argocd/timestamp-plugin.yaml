@@ -1,0 +1,35 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-timestamp-plugin
+  namespace: argocd
+  labels:
+    app.kubernetes.io/part-of: argocd
+data:
+  plugin.yaml: |
+    apiVersion: argoproj.io/v1alpha1
+    kind: ConfigManagementPlugin
+    metadata:
+      name: timestamp-plugin
+    spec:
+      version: v1.0
+      generate:
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            set -e
+            
+            # Get the current commit hash
+            GIT_COMMIT_HASH=$(git -C ${ARGOCD_APP_SOURCE_PATH} rev-parse HEAD)
+            echo "Current commit hash: $GIT_COMMIT_HASH"
+            
+            # Export as environment variable for envsubst
+            export GIT_COMMIT_HASH
+            export TIMESTAMP=$(date +%s)
+            export DATE_FORMATTED=$(date +%Y%m%d%H%M%S)
+            
+            # Process the manifests with kustomize and substitute variables
+            kustomize build ${ARGOCD_APP_SOURCE_PATH} | \
+            sed -e "s/\$(date +%s)/$TIMESTAMP/g" \
+                -e "s/\$(date +%Y%m%d%H%M%S)/$DATE_FORMATTED/g" \
+                -e "s/\${GIT_COMMIT_HASH}/$GIT_COMMIT_HASH/g"
