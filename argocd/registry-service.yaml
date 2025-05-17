@@ -5,19 +5,7 @@ metadata:
   namespace: lilypad
 spec:
   selector:
-    app: registry
+    app: app-registry
   ports:
   - port: 5000
     targetPort: 5000
-  type: ClusterIP
----
-apiVersion: v1
-kind: Endpoints
-metadata:
-  name: registry
-  namespace: lilypad
-subsets:
-  - addresses:
-    - ip: 10.106.91.185
-    ports:
-    - port: 5000

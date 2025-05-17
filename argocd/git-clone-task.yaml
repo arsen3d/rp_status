@@ -1,0 +1,51 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: git-clone
+  namespace: lilypad
+spec:
+  workspaces:
+    - name: output
+      description: The git repo will be cloned into this workspace
+  params:
+    - name: url
+      description: Git repository URL to clone
+      type: string
+    - name: revision
+      description: The git revision to check out
+      type: string
+      default: ""
+    - name: deleteExisting
+      description: Whether to clean up an existing clone
+      type: string
+      default: "false"
+  steps:
+    - name: clone
+      image: gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/git-init:latest
+      script: |
+        #!/usr/bin/env sh
+        set -eu
+        
+        # Clean the workspace if requested
+        if [ "$(params.deleteExisting)" = "true" ]; then
+          echo "Cleaning the workspace directory..."
+          rm -rf $(workspaces.output.path)/*
+          rm -rf $(workspaces.output.path)/.git
+        fi
+        
+        # Clone the repository
+        echo "Cloning $(params.url)..."
+        git clone $(params.url) $(workspaces.output.path)
+        
+        # Check out specific revision if provided
+        if [ -n "$(params.revision)" ]; then
+          cd $(workspaces.output.path)
+          echo "Checking out revision: $(params.revision)"
+          git checkout $(params.revision)
+        fi
+        
+        # Display cloned repo info
+        cd $(workspaces.output.path)
+        echo "Cloned repository info:"
+        git status
+        git log -1

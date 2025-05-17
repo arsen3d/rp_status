@@ -25,7 +25,7 @@ spec:
     - name: image-tag
       value: latest
     - name: registry-url
-      value: "registry:5000"  # Internal cluster registry service
+      value: "app-registry:5000"  # Internal cluster registry service
     - name: registry-user
       value: ""  # Replace if needed
     - name: registry-password

@@ -23,7 +23,7 @@ spec:
     spec:
       containers:
       - name: rp-dashboard
-        image: app-registry:5000/rp_status-rp-dashboard:latest
+        image: app-registry.lilypad.svc.cluster.local:5000/rp_status-rp-dashboard:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 80
