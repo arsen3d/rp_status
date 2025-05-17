@@ -4,6 +4,9 @@
 
 set -e
 
+# Ensure kubectl is available
+export PATH=$PATH:/usr/local/bin:/usr/bin
+
 # Repository details
 REPO_OWNER="arsen3d"
 REPO_NAME="rp_status"
@@ -37,6 +40,9 @@ if [ -f "$COMMIT_FILE" ]; then
 else
     echo "No previous commit hash found. This appears to be the first run."
     echo "Triggering initial deployment..."
+    # Create initial file to avoid future first-run issues
+    mkdir -p $(dirname "$COMMIT_FILE")
+    touch "$COMMIT_FILE"
 fi
 
 # Update the commit in our configmap
