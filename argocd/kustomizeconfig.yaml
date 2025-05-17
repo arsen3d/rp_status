@@ -1,10 +1,10 @@
 nameReference:
 - kind: Deployment
   fieldSpecs:
-  - path: spec/selector
+  - path: spec/selector/matchLabels/app
     kind: Deployment
     create: false
 
 varReference:
-- path: spec/selector
+- path: spec/selector/matchLabels/app
   kind: Deployment
