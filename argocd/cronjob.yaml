@@ -1,0 +1,69 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: github-commit-checker
+  namespace: lilypad
+spec:
+  schedule: "*/1 * * * *"  # Run every minute
+  concurrencyPolicy: Replace
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: github-checker
+          containers:
+          - name: github-checker
+            image: bitnami/kubectl:latest
+            env:
+            - name: REPO_OWNER
+              value: "arsen3d"
+            - name: REPO_NAME
+              value: "rp_status"
+            - name: BRANCH
+              value: "main"
+            command:
+            - /bin/bash
+            - -c
+            - |
+              # Get the latest commit hash from GitHub
+              echo "Fetching latest commit from GitHub..."
+              LATEST_COMMIT=$(curl -s https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/commits/$BRANCH | grep -m 1 "sha" | cut -d '"' -f 4)
+
+              if [ -z "$LATEST_COMMIT" ]; then
+                  echo "Failed to fetch latest commit hash. Exiting."
+                  exit 1
+              fi
+
+              echo "Latest commit: $LATEST_COMMIT"
+              CLEAN_COMMIT=$(echo $LATEST_COMMIT | cut -c 1-8)
+              echo "Clean commit (short): $CLEAN_COMMIT"
+
+              # Get current commit from configmap or create it if it doesn't exist
+              kubectl get configmap build-info -n lilypad 2>/dev/null || kubectl create configmap build-info -n lilypad
+              CURRENT_COMMIT=$(kubectl get configmap build-info -n lilypad -o jsonpath='{.data.git_commit}' 2>/dev/null)
+              
+              # Only update if different
+              if [ "$CURRENT_COMMIT" != "$LATEST_COMMIT" ]; then
+                echo "New commit detected: $LATEST_COMMIT, current: $CURRENT_COMMIT"
+                
+                # Update the commit in our configmap
+                echo "Updating ConfigMap with commit hash..."
+                kubectl patch configmap build-info -n lilypad --type=merge -p "{\"data\":{\"git_commit\":\"$LATEST_COMMIT\",\"clean_commit\":\"$CLEAN_COMMIT\"}}"
+
+                # Update the deployment to use the proper commit hash instead of placeholders
+                echo "Updating deployment annotations..."
+                kubectl get deployment rp-dashboard -n lilypad 2>/dev/null && (
+                    # Update git-commit and revision annotations in Deployment metadata
+                    kubectl patch deployment rp-dashboard -n lilypad --type=strategic --patch "{\"metadata\":{\"annotations\":{\"git-commit\":\"$LATEST_COMMIT\",\"revision\":\"$CLEAN_COMMIT\"}}}"
+                    
+                    # Update git-commit and kubectl.kubernetes.io/restartedAt annotations in Pod Template
+                    kubectl patch deployment rp-dashboard -n lilypad --type=strategic --patch "{\"spec\":{\"template\":{\"metadata\":{\"annotations\":{\"git-commit\":\"$LATEST_COMMIT\",\"kubectl.kubernetes.io/restartedAt\":\"$(date -u +%FT%TZ)\"},\"labels\":{\"revision\":\"$CLEAN_COMMIT\"}}}}}"
+                    
+                    # Force a rollout with explicit new hash
+                    echo "Forcing deployment restart..."
+                    kubectl rollout restart deployment rp-dashboard -n lilypad
+                ) || echo "Deployment not found - no updates applied"
+              else
+                echo "No new commit detected. Current: $CURRENT_COMMIT"
+              fi
+          restartPolicy: OnFailure
