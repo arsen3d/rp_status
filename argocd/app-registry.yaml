@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-registry
+  namespace: lilypad
+  labels:
+    app: app-registry
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app-registry
+  template:
+    metadata:
+      labels:
+        app: app-registry
+    spec:
+      containers:
+      - name: registry
+        image: registry:2
+        ports:
+        - containerPort: 5000
+        resources:
+          limits:
+            cpu: "0.5"
+            memory: "512Mi"
+          requests:
+            cpu: "0.2"
+            memory: "256Mi"
+        env:
+        - name: REGISTRY_STORAGE_DELETE_ENABLED
+          value: "true"
+        - name: REGISTRY_HTTP_ADDR
+          value: "0.0.0.0:5000"
+        - name: REGISTRY_HTTP_TLS_CERTIFICATE
+          value: ""
+        - name: REGISTRY_HTTP_TLS_KEY
+          value: ""
+        - name: REGISTRY_PROXY_REMOTEURL
+          value: "https://registry-1.docker.io"
+        volumeMounts:
+        - name: registry-data
+          mountPath: /var/lib/registry
+      volumes:
+      - name: registry-data
+        persistentVolumeClaim:
+          claimName: app-registry-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: app-registry-pvc
+  namespace: lilypad
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: app-registry
+  namespace: lilypad
+spec:
+  selector:
+    app: app-registry
+  ports:
+  - port: 5000
+    targetPort: 5000
+  type: ClusterIP

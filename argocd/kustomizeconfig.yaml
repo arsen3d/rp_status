@@ -1,0 +1,10 @@
+nameReference:
+- kind: Deployment
+  fieldSpecs:
+  - path: spec/selector
+    kind: Deployment
+    create: false
+
+varReference:
+- path: spec/selector
+  kind: Deployment

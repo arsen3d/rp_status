@@ -21,13 +21,15 @@ spec:
     namespace: lilypad
   syncPolicy:
     automated:
-      prune: true
+      prune: false  # Changed to false to prevent deletion of resources
       selfHeal: true
       allowEmpty: false
     syncOptions:
       - CreateNamespace=true
       - RespectIgnoreDifferences=true
       - ApplyOutOfSyncOnly=true
+      - ServerSideApply=true  # Added for more controlled apply
+      - FieldManager=argocd  # Control the field manager
     retry:
       limit: 5
       backoff:
@@ -41,3 +43,10 @@ spec:
       namespace: lilypad
       jsonPointers:
         - /spec/selector
+        - /spec/template/metadata/labels
+    - group: apps
+      kind: Deployment
+      name: rp-dashboard
+      namespace: lilypad
+      jqPathExpressions:
+        - .spec.selector
