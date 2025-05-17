@@ -31,7 +31,8 @@ kubectl patch configmap build-info -n lilypad --type=merge -p "{\"data\":{\"git_
 
 # Force a refresh of the ArgoCD application
 echo "Forcing ArgoCD to refresh the application..."
-kubectl patch application rp-status -n argocd --type=json -p="[{\"op\":\"replace\",\"path\":\"/metadata/annotations/argocd.argoproj.io~1refresh\",\"value\":\"$(date +%s)\"}]"
+kubectl patch application rp-status -n argocd --type=json -p='[{"op":"replace","path":"/metadata/annotations/argocd.argoproj.io~1refresh","value":"hard"}]' || \
+kubectl patch application rp-status -n argocd --type=merge -p="{\"metadata\":{\"annotations\":{\"argocd.argoproj.io/refresh\":\"hard\"}}}"
 
 echo "Done! ArgoCD should now sync to commit $LATEST_COMMIT"
 echo "Monitor the sync status in the ArgoCD UI or with: argocd app get rp-status"
