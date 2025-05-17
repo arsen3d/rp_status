@@ -17,17 +17,24 @@ spec:
     - name: image-name
       type: string
       description: The name of the image to build
-      default: "rp_status-rp-dashboard"
+      default: "localhost:5000/rp_status-rp-dashboard"
     - name: image-tag
       type: string
       description: The tag for the built image
       default: "latest"
   tasks:
+    - name: setup-local-registry
+      taskRef:
+        name: setup-registry
+        kind: Task
+        apiVersion: tekton.dev/v1beta1
     - name: fetch-repository
       taskRef:
         name: git-clone
         kind: ClusterTask
         apiVersion: tekton.dev/v1beta1
+      runAfter:
+        - setup-local-registry
       workspaces:
         - name: output
           workspace: shared-workspace
@@ -66,4 +73,4 @@ spec:
         - name: script
           value: |
             kubectl apply -k ./argocd/
-            kubectl rollout restart deployment rp-dashboard -n rp-dashboard
+            kubectl rollout restart deployment rp-dashboard -n lilypad

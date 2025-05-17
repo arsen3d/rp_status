@@ -15,3 +15,26 @@ spec:
         #!/bin/sh
         set -e
         $(params.script)
+---
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: setup-registry
+  namespace: lilypad
+spec:
+  steps:
+    - name: create-registry
+      image: docker:dind
+      securityContext:
+        privileged: true
+      script: |
+        #!/bin/sh
+        set -e
+        # Check if registry container is already running
+        if ! docker ps | grep -q registry; then
+          echo "Setting up local Docker registry..."
+          docker run -d -p 5000:5000 --restart=always --name registry registry:2
+          echo "Local Docker registry is running at localhost:5000"
+        else
+          echo "Local Docker registry is already running"
+        fi
