@@ -21,10 +21,56 @@ spec:
       labels:
         app: rp-dashboard
     spec:
+      initContainers:
+      - name: copy-source
+        image: alpine:latest
+        command:
+        - /bin/sh
+        - -c
+        - |
+          # Copy the application files to the workspace
+          cp -R /root/rp_status/* /workspace/
+          echo "Source code copied to workspace for building"
+        volumeMounts:
+        - name: workspace-volume
+          mountPath: /workspace
+        - name: root-volume
+          mountPath: /root
+      - name: build-container
+        image: gcr.io/kaniko-project/executor:latest
+        args:
+        - "--dockerfile=/workspace/Dockerfile"
+        - "--context=dir:///workspace"
+        - "--no-push"
+        - "--tarPath=/workspace/image.tar"
+        volumeMounts:
+        - name: workspace-volume
+          mountPath: /workspace
+      - name: load-image
+        image: docker:20.10
+        securityContext:
+          privileged: true
+        command:
+        - /bin/sh
+        - -c
+        - |
+          # Start Docker daemon in background
+          dockerd &
+          sleep 5
+          # Load the image from tar
+          docker load < /workspace/image.tar
+          # Tag it for local use
+          docker tag rp_status-rp-dashboard:latest localhost:5000/rp_status-rp-dashboard:latest
+          echo "Image ready for use"
+        volumeMounts:
+        - name: workspace-volume
+          mountPath: /workspace
+        - name: docker-socket
+          mountPath: /var/run/docker.sock
       containers:
       - name: rp-dashboard
-        image: app-registry.lilypad.svc.cluster.local:5000/rp_status-rp-dashboard:latest
-        imagePullPolicy: Always
+        image: localhost:5000/rp_status-rp-dashboard:latest
+        imagePullPolicy: Never
         ports:
         - containerPort: 80
         resources:
@@ -34,6 +80,14 @@ spec:
           requests:
             cpu: "0.2"
             memory: "256Mi"
-      imagePullSecrets:
-      - name: registry-credentials  # This will be created in the deploy-application task if needed
-      - name: app-registry-secret   # For pulling from our app-registry
+      volumes:
+      - name: workspace-volume
+        emptyDir: {}
+      - name: docker-socket
+        hostPath:
+          path: /var/run/docker.sock
+          type: Socket
+      - name: root-volume
+        hostPath:
+          path: /root
+          type: Directory
