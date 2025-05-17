@@ -3,10 +3,14 @@ kind: Service
 metadata:
   name: rp-dashboard
   namespace: lilypad
+  labels:
+    app: rp-dashboard
+    app.kubernetes.io/instance: rp-status
+    managed-by: argocd
 spec:
   selector:
     app: rp-dashboard
   ports:
   - port: 8090
     targetPort: 80
-  type: ClusterIP
+  type: LoadBalancer
