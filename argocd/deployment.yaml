@@ -7,8 +7,7 @@ metadata:
     app: rp-dashboard
   annotations:
     argocd.argoproj.io/compare-options: IgnoreResourceVersion,IgnoreResourceStatusField
-    argocd.argoproj.io/sync-options: Prune=false,SkipDryRunOnMissingResource=true,FieldManager=argocd-deploy
-    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/sync-options: Prune=false,SkipDryRunOnMissingResource=true,FieldManager=argocd-deploy,ApplyOutOfSyncOnly=true
 spec:
   replicas: 1
   selector:
