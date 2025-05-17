@@ -64,12 +64,17 @@ spec:
         echo "Building Docker image $(params.image-name):${FULL_TAG}..."
         docker build -t $(params.image-name):${FULL_TAG} -f $(params.dockerfile) .
         
-        # Also tag as latest for backward compatibility
-        docker tag $(params.image-name):${FULL_TAG} $(params.image-name):$(params.image-tag)
+        # Tag with registry URL for pushing
+        REGISTRY_IMAGE="$(params.registry-url)/$(params.image-name):${FULL_TAG}"
+        REGISTRY_IMAGE_LATEST="$(params.registry-url)/$(params.image-name):latest"
+        
+        # Tag images with registry URL
+        docker tag $(params.image-name):${FULL_TAG} ${REGISTRY_IMAGE}
+        docker tag $(params.image-name):${FULL_TAG} ${REGISTRY_IMAGE_LATEST}
         
         # Save the image to a tar file
         echo "Saving image to tar file..."
-        docker save $(params.image-name):${FULL_TAG} $(params.image-name):$(params.image-tag) -o /tmp/image.tar
+        docker save ${REGISTRY_IMAGE} ${REGISTRY_IMAGE_LATEST} -o /tmp/image.tar
         
         # Copy the image to minikube
         echo "Transferring image to minikube..."
@@ -185,15 +190,6 @@ spec:
         echo "- Image tag: $(params.image-tag)"
         echo "- Registry URL: $(params.registry-url)"
         
-        # Check if we're using minikube's local registry
-        if [[ "$(params.registry-url)" == *"localhost"* || "$(params.registry-url)" == *"127.0.0.1"* ]]; then
-          echo "Using local minikube environment, skipping actual push to registry."
-          echo "The image will be loaded directly into minikube."
-          exit 0
-        fi
-        
-        # For external registries, continue with normal push process
-        
         # Load the image from the previous step
         echo "Loading Docker image from previous step..."
         docker load -i /workspace/image.tar
@@ -204,22 +200,23 @@ spec:
           exit 1
         fi
         
-        # Tag the image with the registry URL
-        REGISTRY_IMAGE="$(params.registry-url)/$(params.image-name):$(params.image-tag)"
-        echo "Tagging image as ${REGISTRY_IMAGE}..."
-        docker tag $(params.image-name):$(params.image-tag) ${REGISTRY_IMAGE}
+        # Registry images should already be tagged correctly in the previous step
+        REGISTRY_IMAGE_LATEST="$(params.registry-url)/$(params.image-name):latest"
         
         # Login to the registry if credentials are provided
         if [ -n "$(params.registry-user)" ] && [ -n "$(params.registry-password)" ]; then
           echo "Logging in to Docker registry $(params.registry-url)..."
           echo "$(params.registry-password)" | docker login $(params.registry-url) -u $(params.registry-user) --password-stdin
         else
-          echo "No registry credentials provided, skipping login."
+          echo "No registry credentials provided, assuming local registry access."
         fi
         
         # Push the image to the registry
         echo "Pushing image to registry..."
-        docker push ${REGISTRY_IMAGE}
+        docker push ${REGISTRY_IMAGE_LATEST}
+        
+        # Verify the push
+        docker images | grep $(params.registry-url)/$(params.image-name)
         
         echo "Image successfully pushed to registry!"
   volumes:

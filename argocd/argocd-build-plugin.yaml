@@ -66,8 +66,14 @@ data:
             # Apply the PipelineRun
             kubectl apply -f /tmp/pipelinerun-${TIMESTAMP}.yaml
             
-            # Wait a moment to let the pipeline start
-            sleep 5
+            # Wait for the pipeline to complete
+            echo "Waiting for pipeline to start..."
+            sleep 10
+            
+            # Monitor the pipeline status
+            echo "Monitoring pipeline status..."
+            # Check that the pipeline exists
+            kubectl get pipelinerun docker-build-pipeline-run-${TIMESTAMP} -n lilypad
             
             # Apply kustomization
             kubectl kustomize . > /tmp/manifests.yaml
