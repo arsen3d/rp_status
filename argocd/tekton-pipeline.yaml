@@ -25,7 +25,7 @@ spec:
     - name: registry-url
       type: string
       description: The Docker registry URL to push the image to
-      default: "app-registry:5000"
+      default: "localhost:5000"
     - name: registry-user
       type: string
       description: The Docker registry username
