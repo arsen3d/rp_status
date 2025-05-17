@@ -28,6 +28,13 @@ data:
             export TIMESTAMP=$(date +%s)
             export DATE_FORMATTED=$(date +%Y%m%d%H%M%S)
             
+            # Enable extra debug information if requested
+            if [ "$GENERATE_COMMIT_TIMESTAMPS" = "true" ]; then
+              echo "Generating commit timestamps for: $GIT_COMMIT_HASH"
+              echo "Timestamp: $TIMESTAMP"
+              echo "Formatted date: $DATE_FORMATTED"
+            fi
+            
             # Process the manifests with kustomize and substitute variables
             kustomize build ${ARGOCD_APP_SOURCE_PATH} | \
             sed -e "s/\$(date +%s)/$TIMESTAMP/g" \

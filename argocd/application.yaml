@@ -20,6 +20,9 @@ spec:
     path: argocd
     plugin:
       name: timestamp-plugin
+      env:
+        - name: GENERATE_COMMIT_TIMESTAMPS
+          value: "true"
     # Make argocd track the commit hash
     helm:
       parameters:

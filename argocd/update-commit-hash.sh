@@ -1,25 +1,34 @@
 #!/bin/bash
-# Script to fetch the latest commit hash from GitHub and use it to force redeployment
+# This script is run by ArgoCD before syncing the application
+# It updates the configmap with the current commit hash
 
-# Repository details
-REPO_OWNER="arsen3d"
-REPO_NAME="rp_status"
-BRANCH="main"  # or your default branch
+set -e
 
-# Get the latest commit hash from GitHub
-LATEST_COMMIT=$(curl -s https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/commits/$BRANCH | grep -m 1 "sha" | cut -d '"' -f 4)
-
-if [ -z "$LATEST_COMMIT" ]; then
-    echo "Failed to fetch latest commit hash. Using timestamp instead."
-    LATEST_COMMIT="timestamp-$(date +%s)"
+# Get the current commit hash from ArgoCD environment or fetch from GitHub
+if [ -n "$ARGOCD_APP_REVISION" ]; then
+  COMMIT_HASH="$ARGOCD_APP_REVISION"
+  echo "Using commit hash from ArgoCD: $COMMIT_HASH"
+else
+  # Fall back to GitHub API if ArgoCD environment is not available
+  REPO_OWNER="arsen3d"
+  REPO_NAME="rp_status"
+  BRANCH="main"
+  
+  echo "Fetching latest commit from GitHub API..."
+  COMMIT_HASH=$(curl -s https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/commits/$BRANCH | grep -m 1 "sha" | cut -d '"' -f 4)
+  
+  if [ -z "$COMMIT_HASH" ]; then
+    echo "Failed to get commit hash, using timestamp instead"
+    COMMIT_HASH="timestamp-$(date +%s)"
+  fi
 fi
 
-echo "Latest commit: $LATEST_COMMIT"
+# Update the configmap with the commit hash
+echo "Updating configmap with commit hash: $COMMIT_HASH"
+kubectl patch configmap build-info -n lilypad --type=merge -p "{\"data\":{\"git_commit\":\"$COMMIT_HASH\"}}" || true
 
-# Update the configmap with the latest commit hash
-kubectl patch configmap build-info -n lilypad --type=merge -p "{\"data\":{\"git_commit\":\"$LATEST_COMMIT\"}}"
+# Update the deployment annotation to force a redeploy
+echo "Updating deployment annotation with commit hash: $COMMIT_HASH"
+kubectl patch deployment rp-dashboard -n lilypad --type=strategic --patch "{\"spec\":{\"template\":{\"metadata\":{\"annotations\":{\"git-commit\":\"$COMMIT_HASH\"}}}}}" || true
 
-# Update the deployment to use the new commit hash
-kubectl patch deployment rp-dashboard -n lilypad --type=strategic --patch "{\"spec\":{\"template\":{\"metadata\":{\"annotations\":{\"git-commit\":\"$LATEST_COMMIT\"}}}}}"
-
-echo "Updated deployment with latest commit hash: $LATEST_COMMIT"
+echo "Commit hash updated successfully"

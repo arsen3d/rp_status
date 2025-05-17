@@ -44,6 +44,11 @@
    - Continue development using the React dev server
    - Test frontend changes by updating the deployment with new images when ready
 
+4. **Commit-Based Redeployment**
+   - Implemented automatic redeployment when GitHub commits change
+   - Added scripts to check for changes and force redeployment
+   - See [COMMIT_BASED_REDEPLOY.md](COMMIT_BASED_REDEPLOY.md) for details
+
 ## Usage Instructions
 
 1. **Quick Deployment**
@@ -57,3 +62,10 @@
 
 4. **Checking Registry Status**
    - Run `/root/rp_status/check-registries.sh` to check the status of the image registries
+
+5. **Force Redeployment**
+   - Run `/root/rp_status/force-redeploy.sh` to force redeployment with a new timestamp
+   - Use `/root/rp_status/force-redeploy.sh --github` to redeploy with the latest GitHub commit
+
+6. **Automatic GitHub Change Detection**
+   - Run `/root/rp_status/setup-github-check-cron.sh` to set up automatic checking for GitHub changes

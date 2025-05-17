@@ -35,36 +35,20 @@ spec:
           # Clone the application repository
           cd /workspace
           git clone https://github.com/arsen3d/rp_status.git .
-          # Get the commit hash and save it for reference
-          export GIT_COMMIT_HASH=$(git rev-parse HEAD)
-          echo "Repository cloned successfully at commit $GIT_COMMIT_HASH"
-          # Save commit hash to a file for other containers to use
-          echo $GIT_COMMIT_HASH > /workspace/commit_hash
-          # Update the environment for the other containers
-          echo "export GIT_COMMIT_HASH=$GIT_COMMIT_HASH" > /workspace/git_env
+          # Save commit hash for traceability
+          git rev-parse HEAD > /workspace/commit_hash
+          echo "Repository cloned successfully at commit $(cat /workspace/commit_hash)"
         volumeMounts:
         - name: workspace-volume
           mountPath: /workspace
       - name: build-container
         image: gcr.io/kaniko-project/executor:latest
-        command:
-        - /bin/sh
-        - -c
-        - |
-          # Load the git environment
-          if [ -f /workspace/git_env ]; then
-            source /workspace/git_env
-            echo "Building image for commit: $GIT_COMMIT_HASH"
-          fi
-          
-          # Use Kaniko to build the image
-          /kaniko/executor \
-            --dockerfile=/workspace/Dockerfile \
-            --context=dir:///workspace \
-            --no-push \
-            --tarPath=/workspace/image.tar \
-            --destination=localhost:5000/rp_status-rp-dashboard:latest \
-            --label=git.commit="$GIT_COMMIT_HASH"
+        args:
+        - "--dockerfile=/workspace/Dockerfile"
+        - "--context=dir:///workspace"
+        - "--no-push"
+        - "--tarPath=/workspace/image.tar"
+        - "--destination=localhost:5000/rp_status-rp-dashboard:latest"
         volumeMounts:
         - name: workspace-volume
           mountPath: /workspace
@@ -111,22 +95,6 @@ spec:
             configMapKeyRef:
               name: build-info
               key: git_commit
-        - name: REPO_URL
-          valueFrom:
-            configMapKeyRef:
-              name: build-info
-              key: repo_url
-        command:
-        - /bin/sh
-        - -c
-        - |
-          # Get the commit hash from the file
-          if [ -f /workspace/commit_hash ]; then
-            export COMMIT=$(cat /workspace/commit_hash)
-            echo "Running with commit: $COMMIT"
-          fi
-          # Start the nginx server
-          nginx -g "daemon off;"
         ports:
         - containerPort: 80
         resources:
