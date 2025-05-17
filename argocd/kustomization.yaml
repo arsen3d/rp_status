@@ -6,7 +6,7 @@ namespace: lilypad
 resources:
 - deployment.yaml
 - service.yaml
-- ingress.yaml
+# - ingress.yaml
 - tekton-pipeline.yaml
 - tekton-tasks.yaml
 - tekton-pipelinerun.yaml
