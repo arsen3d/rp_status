@@ -12,7 +12,9 @@ resources:
 # - tekton-pipelinerun.yaml  # Commented out as PipelineRuns are managed by the build plugin
 - argocd-build-plugin.yaml
 
-commonLabels:
-  app: rp-dashboard
-  part-of: rp-status
-  managed-by: argocd
+# Use labels without affecting the selectors
+labels:
+- pairs:
+    part-of: rp-status
+    managed-by: argocd
+  includeSelectors: false

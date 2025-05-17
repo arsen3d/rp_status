@@ -7,11 +7,13 @@ metadata:
     app: rp-dashboard
   annotations:
     tekton.dev/lastBuilt: ""  # This will be updated by the pipeline
+    argocd.argoproj.io/compare-options: IgnoreResourceVersion
+    argocd.argoproj.io/sync-options: Prune=false
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: rp-dashboard
+      app: rp-dashboard  # Do not modify this field
   template:
     metadata:
       labels:

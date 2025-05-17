@@ -107,12 +107,12 @@ spec:
             echo "Updating deployment configuration to use registry image..."
             REGISTRY_IMAGE="$(params.registry-url)/$(params.image-name):latest"
             
-            # Use strategic merge patch to update only the image
-            kubectl patch deployment rp-dashboard -n lilypad --patch "{\"spec\":{\"template\":{\"spec\":{\"containers\":[{\"name\":\"rp-dashboard\",\"image\":\"${REGISTRY_IMAGE}\"}]}}}}" --type=strategic || true
+            # Use a very targeted patch that only modifies the image
+            kubectl patch deployment rp-dashboard -n lilypad --patch "{\"spec\":{\"template\":{\"spec\":{\"containers\":[{\"name\":\"rp-dashboard\",\"image\":\"${REGISTRY_IMAGE}\"}]}}}}" --type=merge || echo "Image update failed but continuing"
             
-            # Add a timestamp annotation to force redeployment (using a different patch to avoid issues)
+            # Add a timestamp annotation to force redeployment (separate operation)
             echo "Adding timestamp annotation to deployment..."
-            kubectl patch deployment rp-dashboard -n lilypad --patch "{\"metadata\":{\"annotations\":{\"tekton.dev/lastBuilt\":\"${TIMESTAMP}\"}}}" --type=strategic || true
+            kubectl patch deployment rp-dashboard -n lilypad --patch "{\"metadata\":{\"annotations\":{\"tekton.dev/lastBuilt\":\"${TIMESTAMP}\"}}}" --type=merge || echo "Annotation update failed but continuing"
             
             # Create registry credentials if needed
             if [[ "$(params.registry-url)" != *"localhost"* && "$(params.registry-url)" != *"127.0.0.1"* ]]; then

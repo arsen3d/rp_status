@@ -34,3 +34,10 @@ spec:
         duration: 5s
         factor: 2
         maxDuration: 3m
+  ignoreDifferences:
+    - group: apps
+      kind: Deployment
+      name: rp-dashboard
+      namespace: lilypad
+      jsonPointers:
+        - /spec/selector
