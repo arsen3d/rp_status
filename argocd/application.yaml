@@ -24,10 +24,7 @@ spec:
       env:
         - name: GENERATE_COMMIT_TIMESTAMPS
           value: "true"
-    # Make argocd track the commit hash
-    helm:
-      parameters:
-        - name: git.revision
+        - name: GIT_REVISION
           value: ""  # This will be populated by the plugin from the actual commit
   destination:
     server: https://kubernetes.default.svc
