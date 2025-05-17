@@ -5,10 +5,9 @@ metadata:
   namespace: lilypad
   labels:
     app: rp-dashboard
-  # annotations:
-  #   tekton.dev/lastBuilt: ""  # This will be updated by the pipeline
-  #   argocd.argoproj.io/compare-options: IgnoreResourceVersion,IgnoreResourceStatusField
-  #   argocd.argoproj.io/sync-options: Prune=false,SkipDryRunOnMissingResource=true,FieldManager=argocd-deploy
+  annotations:
+    argocd.argoproj.io/compare-options: IgnoreResourceVersion,IgnoreResourceStatusField
+    argocd.argoproj.io/sync-options: Prune=false,SkipDryRunOnMissingResource=true,FieldManager=argocd-deploy
 spec:
   replicas: 1
   selector:

@@ -3,10 +3,10 @@ kind: Application
 metadata:
   name: rp-status
   namespace: argocd
-  # annotations:
-  #   argocd-image-updater.argoproj.io/image-list: rp_status-rp-dashboard=rp_status-rp-dashboard
-  #   argocd-image-updater.argoproj.io/rp_status-rp-dashboard.update-strategy: digest
-  #   argocd-image-updater.argoproj.io/rp_status-rp-dashboard.force-update: "true"
+  annotations:
+    argocd-image-updater.argoproj.io/image-list: rp_status-rp-dashboard=rp_status-rp-dashboard
+    argocd-image-updater.argoproj.io/rp_status-rp-dashboard.update-strategy: digest
+    argocd-image-updater.argoproj.io/rp_status-rp-dashboard.force-update: "true"
     # argocd-image-updater.argoproj.io/write-back-method: git
 spec:
   project: default
@@ -30,6 +30,7 @@ spec:
       - ApplyOutOfSyncOnly=true
       - ServerSideApply=true  # Added for more controlled apply
       - FieldManager=argocd  # Control the field manager
+      - IgnoreResourceVersion=true  # Ignore resource version differences
     retry:
       limit: 5
       backoff:
@@ -44,6 +45,8 @@ spec:
       jsonPointers:
         - /spec/selector
         - /spec/template/metadata/labels
+        - /spec/template/spec/containers/0/image
+        - /spec/template/spec/initContainers
     - group: apps
       kind: Deployment
       name: rp-dashboard

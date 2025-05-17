@@ -13,11 +13,11 @@ resources:
 # - argocd-build-plugin.yaml
 
 # Remove labels entirely to avoid any potential problems with selectors
-# labels:
-#  - pairs:
-#      part-of: rp-status
-#      managed-by: argocd
-#    includeSelectors: false
+labels:
+ - pairs:
+     part-of: rp-status
+     managed-by: argocd
+   includeSelectors: false
 
 configurations:
 - kustomizeconfig.yaml
