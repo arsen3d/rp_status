@@ -5,7 +5,7 @@ metadata:
   namespace: lilypad
   annotations:
     # This annotation will force ArgoCD to always update this resource
-    argocd.argoproj.io/sync-options: Replace=true
+    argocd.argoproj.io/sync-options: Replace=true,Force=true
     argocd.argoproj.io/hook: PreSync
     argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
     argocd.argoproj.io/sync-wave: "-1"  # Run before other resources
