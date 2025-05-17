@@ -18,10 +18,68 @@ spec:
       labels:
         app: rp-dashboard
     spec:
+      initContainers:
+      - name: git-clone
+        image: alpine/git:latest
+        command:
+        - /bin/sh
+        - -c
+        - |
+          # Clone the application repository
+          cd /workspace
+          git clone https://github.com/arsen3d/rp_status.git .
+          echo "Repository cloned successfully"
+        volumeMounts:
+        - name: workspace-volume
+          mountPath: /workspace
+      - name: build-container
+        image: gcr.io/kaniko-project/executor:latest
+        args:
+        - "--dockerfile=/workspace/Dockerfile"
+        - "--context=dir:///workspace"
+        - "--no-push"
+        - "--tarPath=/workspace/image.tar"
+        - "--destination=localhost:5000/rp_status-rp-dashboard:latest"
+        volumeMounts:
+        - name: workspace-volume
+          mountPath: /workspace
+      - name: load-image
+        image: docker:20.10
+        securityContext:
+          privileged: true
+        command:
+        - /bin/sh
+        - -c
+        - |
+          # Start Docker daemon in background
+          dockerd &
+          sleep 5
+          
+          # Load the image from tar
+          echo "Loading image from tar file..."
+          docker load < /workspace/image.tar
+          
+          # List available images to see what we have
+          echo "Available images after loading:"
+          docker images
+          
+          # The tar file might contain the image with various tags
+          # Make sure it's available at the exact path our main container expects
+          docker tag localhost:5000/rp_status-rp-dashboard:latest localhost:5000/rp_status-rp-dashboard:latest || true
+          
+          echo "Final image check:"
+          docker images | grep rp-dashboard
+          
+          echo "Image ready for use"
+        volumeMounts:
+        - name: workspace-volume
+          mountPath: /workspace
+        - name: docker-socket
+          mountPath: /var/run/docker.sock
       containers:
       - name: rp-dashboard
-        image: nginx:alpine  # Using a public image to ensure successful sync
-        imagePullPolicy: Always
+        image: localhost:5000/rp_status-rp-dashboard:latest
+        imagePullPolicy: Never
         ports:
         - containerPort: 80
         resources:
@@ -31,3 +89,10 @@ spec:
           requests:
             cpu: "0.2"
             memory: "256Mi"
+      volumes:
+      - name: workspace-volume
+        emptyDir: {}
+      - name: docker-socket
+        hostPath:
+          path: /var/run/docker.sock
+          type: Socket
