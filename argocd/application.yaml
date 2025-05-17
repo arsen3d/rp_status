@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: rp-dashboard
+  name: rp-status
   namespace: argocd
   annotations:
     argocd-image-updater.argoproj.io/image-list: rp_status-rp-dashboard=rp_status-rp-dashboard
@@ -12,7 +12,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/arsen3d/rp_status.git  # Replace with your actual Git repository URL
-    # targetRevision: main
+    targetRevision: HEAD
     path: argocd
     plugin:
       name: argocd-build-plugin
