@@ -34,6 +34,7 @@ spec:
       - RespectIgnoreDifferences=false  # Ensures syncs occur despite ignored differences
       - ApplyOutOfSyncOnly=false  # Force apply on every sync
       - Replace=true  # Use replace instead of apply to ensure all resources are recreated
+      - Force=true  # Force sync even if resources are unchanged
     retry:
       limit: 5
       backoff:
