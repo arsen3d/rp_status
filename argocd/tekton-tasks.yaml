@@ -39,6 +39,10 @@ spec:
       description: The path to the Dockerfile
       type: string
       default: "./Dockerfile"
+    - name: registry-url
+      description: The Docker registry URL
+      type: string
+      default: "registry:5000"
   steps:
     - name: build-and-load
       image: docker:24.0-dind

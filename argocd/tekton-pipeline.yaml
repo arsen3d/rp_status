@@ -106,8 +106,11 @@ spec:
             # Update deployment configuration to use registry image
             echo "Updating deployment configuration to use registry image..."
             REGISTRY_IMAGE="$(params.registry-url)/$(params.image-name):latest"
-            sed -i "s|image:.*|image: ${REGISTRY_IMAGE}|g" ./argocd/deployment.yaml
-            sed -i "s|imagePullPolicy:.*|imagePullPolicy: Always|g" ./argocd/deployment.yaml
+            
+            # Use a more targeted sed that only updates the image field in the container spec
+            # This avoids changing the immutable selector field
+            sed -i "/^ *image: /s|image:.*|image: ${REGISTRY_IMAGE}|g" ./argocd/deployment.yaml
+            sed -i "/^ *imagePullPolicy: /s|imagePullPolicy:.*|imagePullPolicy: Always|g" ./argocd/deployment.yaml
             
             # Add a timestamp annotation to force redeployment
             echo "Adding timestamp annotation to deployment..."
