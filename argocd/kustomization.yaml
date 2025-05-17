@@ -23,7 +23,3 @@ labels:
 
 configurations:
 - kustomizeconfig.yaml
-
-# Custom hooks
-generators:
-- post-build-hook.sh

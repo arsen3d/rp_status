@@ -7,8 +7,10 @@ metadata:
     # This annotation will force ArgoCD to always update this resource
     argocd.argoproj.io/sync-options: Replace=true
     # This annotation has unique value on every ArgoCD sync
-    force-recreate: "{{ randAlphaNum 10 }}"
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+    force-recreate: '{{ randAlphaNum 10 }}'
 data:
   # Static data that will change based on the annotation above causing a redeployment
-  timestamp: "redeployed-at-changes-each-sync"
-  build_id: "{{ randAlphaNum 8 }}"
+  timestamp: '{{ now | date "2006-01-02T15:04:05Z07:00" }}'
+  build_id: '{{ randAlphaNum 8 }}'
