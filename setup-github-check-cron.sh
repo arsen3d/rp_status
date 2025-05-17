@@ -3,8 +3,8 @@
 
 echo "Setting up cron job to check for GitHub changes..."
 
-# Create the crontab entry to run every 5 minutes
-CRON_ENTRY="*/5 * * * * /root/rp_status/update-deployment-with-commit.sh >> /tmp/github-check.log 2>&1"
+# Create the crontab entry to run every 1 minutes
+CRON_ENTRY="*/1 * * * * /root/rp_status/update-deployment-with-commit.sh >> /tmp/github-check.log 2>&1"
 
 # Check if the cron job already exists
 if crontab -l 2>/dev/null | grep -q "update-deployment-with-commit.sh\|check-github-changes.sh"; then
