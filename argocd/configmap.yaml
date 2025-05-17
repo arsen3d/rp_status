@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: build-info
+  namespace: lilypad
+  annotations:
+    # This annotation will force ArgoCD to always update this resource
+    argocd.argoproj.io/sync-options: Replace=true
+    # This annotation has unique value on every ArgoCD sync
+    force-recreate: "{{ randAlphaNum 10 }}"
+data:
+  # Static data that will change based on the annotation above causing a redeployment
+  timestamp: "redeployed-at-changes-each-sync"

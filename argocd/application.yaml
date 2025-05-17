@@ -8,6 +8,8 @@ metadata:
     argocd-image-updater.argoproj.io/rp_status-rp-dashboard.update-strategy: digest
     argocd-image-updater.argoproj.io/rp_status-rp-dashboard.force-update: "true"
     # argocd-image-updater.argoproj.io/write-back-method: git
+    argocd.argoproj.io/refresh: hard
+    argocd.argoproj.io/sync-options: Validate=false
 spec:
   project: default
   source:
@@ -27,6 +29,7 @@ spec:
       - ServerSideApply=true  # Added for more controlled apply
       - FieldManager=argocd  # Control the field manager
       - IgnoreResourceVersion=true  # Ignore resource version differences
+      - RespectIgnoreDifferences=false  # Ensures syncs occur despite ignored differences
     retry:
       limit: 5
       backoff:
