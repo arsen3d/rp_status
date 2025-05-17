@@ -6,27 +6,29 @@ metadata:
 spec:
   schedule: "*/1 * * * *"  # Run every minute
   concurrencyPolicy: Replace
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 3
   jobTemplate:
     spec:
+      activeDeadlineSeconds: 180  # Timeout after 3 minutes
       template:
         spec:
           serviceAccountName: github-checker
-          containers:
+          volumes:
+          - name: shared-data
+            emptyDir: {}
+          initContainers:
           - name: github-checker
-            image: bitnami/kubectl:latest
-            env:
-            - name: REPO_OWNER
-              value: "arsen3d"
-            - name: REPO_NAME
-              value: "rp_status"
-            - name: BRANCH
-              value: "main"
+            image: curlimages/curl:latest
             command:
-            - /bin/bash
+            - /bin/sh
             - -c
             - |
               # Get the latest commit hash from GitHub
               echo "Fetching latest commit from GitHub..."
+              REPO_OWNER="arsen3d"
+              REPO_NAME="rp_status"
+              BRANCH="main"
               LATEST_COMMIT=$(curl -s https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/commits/$BRANCH | grep -m 1 "sha" | cut -d '"' -f 4)
 
               if [ -z "$LATEST_COMMIT" ]; then
@@ -36,8 +38,25 @@ spec:
 
               echo "Latest commit: $LATEST_COMMIT"
               CLEAN_COMMIT=$(echo $LATEST_COMMIT | cut -c 1-8)
-              echo "Clean commit (short): $CLEAN_COMMIT"
-
+              
+              # Save commit hashes to shared volume
+              echo "$LATEST_COMMIT" > /shared/latest_commit
+              echo "$CLEAN_COMMIT" > /shared/clean_commit
+            volumeMounts:
+            - name: shared-data
+              mountPath: /shared
+          containers:
+          - name: kubectl-updater
+            image: bitnami/kubectl:latest
+            command:
+            - /bin/bash
+            - -c
+            - |
+              # Read commit hashes from shared volume
+              LATEST_COMMIT=$(cat /shared/latest_commit)
+              CLEAN_COMMIT=$(cat /shared/clean_commit)
+              echo "Using commit: $LATEST_COMMIT ($CLEAN_COMMIT)"
+              
               # Get current commit from configmap or create it if it doesn't exist
               kubectl get configmap build-info -n lilypad 2>/dev/null || kubectl create configmap build-info -n lilypad
               CURRENT_COMMIT=$(kubectl get configmap build-info -n lilypad -o jsonpath='{.data.git_commit}' 2>/dev/null)
@@ -66,4 +85,7 @@ spec:
               else
                 echo "No new commit detected. Current: $CURRENT_COMMIT"
               fi
+            volumeMounts:
+            - name: shared-data
+              mountPath: /shared
           restartPolicy: OnFailure
