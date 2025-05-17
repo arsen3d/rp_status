@@ -8,3 +8,13 @@ nameReference:
 varReference:
 - path: spec/selector/matchLabels/app
   kind: Deployment
+- path: metadata/annotations/git-commit
+  kind: Deployment
+- path: metadata/annotations/revision
+  kind: Deployment
+- path: spec/template/metadata/labels/revision
+  kind: Deployment
+- path: spec/template/metadata/annotations/git-commit
+  kind: Deployment
+- path: spec/template/metadata/annotations/kubectl.kubernetes.io/restartedAt
+  kind: Deployment

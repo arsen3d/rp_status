@@ -7,19 +7,20 @@ metadata:
     app: rp-dashboard
   annotations:
     argocd.argoproj.io/compare-options: IgnoreResourceVersion,IgnoreResourceStatusField
-    argocd.argoproj.io/sync-options: Prune=false,SkipDryRunOnMissingResource=true,FieldManager=argocd-deploy,Force=true
+    argocd.argoproj.io/sync-options: Prune=false,SkipDryRunOnMissingResource=true,FieldManager=argocd-deploy,Validate=false,RespectIgnoreDifferences=true
     argocd.argoproj.io/sync-wave: "1"
-    # argocd.argoproj.io/sync-options: Replace=true,Force=true
-    # Use the git commit hash to force redeploy on every sync
+    # Use the git commit hash to trigger updates without completely replacing the deployment
     git-commit: "${GIT_COMMIT_HASH}"
-    force-recreate: "${GIT_COMMIT_HASH}"
+    revision: "${GIT_COMMIT_HASH}"
 spec:
   replicas: 1
+  # Ensure pods are recreated in a controlled way
+  minReadySeconds: 30  # Wait 30 seconds after a pod is ready before considering it available
   strategy:
     type: RollingUpdate
     rollingUpdate:
-      maxSurge: 1
-      maxUnavailable: 0
+      maxSurge: 1       # Allow one extra pod during updates
+      maxUnavailable: 0 # Never allow unavailable pods during update
   selector:
     matchLabels:
       app: rp-dashboard
@@ -27,8 +28,11 @@ spec:
     metadata:
       labels:
         app: rp-dashboard
+        # Add a unique label using git commit hash to force update without disrupting service
+        revision: "${GIT_COMMIT_HASH}"
       annotations:
-        kubectl.kubernetes.io/restartedAt: "$(date +%s)"
+        # These annotations trigger a rolling update when changed
+        kubectl.kubernetes.io/restartedAt: "${CURRENT_TIMESTAMP}"
         git-commit: "${GIT_COMMIT_HASH}"
     spec:
       # Give pods time to gracefully terminate
@@ -105,22 +109,26 @@ spec:
               key: git_commit
         ports:
         - containerPort: 80
+        lifecycle:
+          preStop:
+            exec:
+              command: ["/bin/sh", "-c", "sleep 15"]  # Give time for connections to drain
         readinessProbe:
           httpGet:
             path: /
             port: 80
-          initialDelaySeconds: 10
-          periodSeconds: 5
-          timeoutSeconds: 2
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
           successThreshold: 1
-          failureThreshold: 3
+          failureThreshold: 6
         livenessProbe:
           httpGet:
             path: /
             port: 80
-          initialDelaySeconds: 15
-          periodSeconds: 10
-          timeoutSeconds: 2
+          initialDelaySeconds: 60
+          periodSeconds: 20
+          timeoutSeconds: 5
           successThreshold: 1
           failureThreshold: 3
         resources:

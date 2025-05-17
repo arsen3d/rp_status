@@ -23,18 +23,20 @@ spec:
     namespace: lilypad
   syncPolicy:
     automated:
-      prune: true  # Changed to true to ensure resources are properly managed
-      selfHeal: true
+      # Enable automatic sync when Git repository changes are detected through polling
+      prune: true      # Automatically delete resources that are no longer defined in Git
+      selfHeal: true   # Automatically sync when drift is detected between Git and the cluster
       allowEmpty: false
     syncOptions:
       - CreateNamespace=true
-      - ServerSideApply=true  # Added for more controlled apply
-      - FieldManager=argocd  # Control the field manager
-      - IgnoreResourceVersion=true  # Ignore resource version differences
-      - RespectIgnoreDifferences=false  # Ensures syncs occur despite ignored differences
-      - ApplyOutOfSyncOnly=false  # Force apply on every sync
-      - Replace=true  # Use replace instead of apply to ensure all resources are recreated
-      - Force=true  # Force sync even if resources are unchanged
+      - ServerSideApply=true
+      - FieldManager=argocd
+      - IgnoreResourceVersion=true
+      - RespectIgnoreDifferences=true
+      - ApplyOutOfSyncOnly=true
+      - Validate=false
+      - Replace=false
+      - Force=false
     retry:
       limit: 5
       backoff:

@@ -13,3 +13,5 @@ data:
   # This will change only when commit hash changes
   git_commit: "{{.Values.git.revision}}"
   repo_url: "https://github.com/arsen3d/rp_status.git"
+  # Current timestamp to force update on sync
+  current_timestamp: "{{ now | date \"2006-01-02T15:04:05Z07:00\" }}"

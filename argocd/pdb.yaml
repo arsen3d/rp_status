@@ -1,0 +1,12 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: rp-dashboard-pdb
+  namespace: lilypad
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"  # Ensure PDB is created before deployment
+spec:
+  maxUnavailable: 0  # No pods can be unavailable during voluntary disruptions
+  selector:
+    matchLabels:
+      app: rp-dashboard
