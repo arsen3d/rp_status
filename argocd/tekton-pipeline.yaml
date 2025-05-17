@@ -22,6 +22,18 @@ spec:
       type: string
       description: The tag for the built image
       default: "latest"
+    - name: registry-url
+      type: string
+      description: The Docker registry URL to push the image to
+      default: "localhost:5000"
+    - name: registry-user
+      type: string
+      description: The Docker registry username
+      default: ""
+    - name: registry-password
+      type: string
+      description: The Docker registry password
+      default: ""
   tasks:
     - name: fetch-repository
       taskRef:
@@ -57,15 +69,56 @@ spec:
           value: .
         - name: dockerfile
           value: ./Dockerfile
+    - name: push-docker-image
+      taskRef:
+        name: docker-push
+        kind: Task
+        apiVersion: tekton.dev/v1beta1
+      runAfter:
+        - build-docker-image
+      workspaces:
+        - name: source
+          workspace: shared-workspace
+      params:
+        - name: image-name
+          value: $(params.image-name)
+        - name: image-tag
+          value: $(params.image-tag)
+        - name: registry-url
+          value: $(params.registry-url)
+        - name: registry-user
+          value: $(params.registry-user)
+        - name: registry-password
+          value: $(params.registry-password)
     - name: deploy-application
       taskRef:
         name: kubernetes-actions
         kind: Task
         apiVersion: tekton.dev/v1beta1
       runAfter:
-        - build-docker-image
+        - push-docker-image
       params:
         - name: script
           value: |
+            # Set the registry URL in the deployment
+            sed -i "s|\${REGISTRY_URL}|$(params.registry-url)|g" ./argocd/deployment.yaml
+            
+            # Create registry credentials if provided
+            if [ -n "$(params.registry-user)" ] && [ -n "$(params.registry-password)" ]; then
+              echo "Creating registry credentials secret..."
+              kubectl create secret docker-registry registry-credentials \
+                --docker-server=$(params.registry-url) \
+                --docker-username=$(params.registry-user) \
+                --docker-password=$(params.registry-password) \
+                --namespace=lilypad \
+                --dry-run=client -o yaml | kubectl apply -f -
+            fi
+            
+            # Apply the Kubernetes resources
             kubectl apply -k ./argocd/
+            
+            # Restart the deployment to ensure it picks up the new image
             kubectl rollout restart deployment rp-dashboard -n lilypad
+            
+            # Monitor rollout status
+            kubectl rollout status deployment rp-dashboard -n lilypad --timeout=60s

@@ -119,3 +119,71 @@ spec:
   volumes:
     - name: docker-storage
       emptyDir: {}
+---
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: docker-push
+  namespace: lilypad
+spec:
+  workspaces:
+    - name: source
+  params:
+    - name: image-name
+      description: The name of the image to push
+      type: string
+    - name: image-tag
+      description: The tag for the image to push
+      type: string
+    - name: registry-url
+      description: The Docker registry URL to push the image to
+      type: string
+    - name: registry-user
+      description: The Docker registry username
+      type: string
+      default: ""
+    - name: registry-password
+      description: The Docker registry password
+      type: string
+      default: ""
+  steps:
+    - name: push-to-registry
+      image: docker:24.0-dind
+      securityContext:
+        privileged: true
+      volumeMounts:
+        - mountPath: /var/lib/docker
+          name: docker-storage
+      script: |
+        #!/bin/sh
+        set -e
+        
+        # Start Docker daemon
+        dockerd-entrypoint.sh &
+        sleep 10  # Give Docker time to start
+        
+        # Load the image from the previous step
+        echo "Loading Docker image from previous step..."
+        docker load -i /workspace/image.tar
+        
+        # Tag the image with the registry URL
+        REGISTRY_IMAGE="$(params.registry-url)/$(params.image-name):$(params.image-tag)"
+        echo "Tagging image as ${REGISTRY_IMAGE}..."
+        docker tag $(params.image-name):$(params.image-tag) ${REGISTRY_IMAGE}
+        
+        # Login to the registry if credentials are provided
+        if [ -n "$(params.registry-user)" ] && [ -n "$(params.registry-password)" ]; then
+          echo "Logging in to Docker registry $(params.registry-url)..."
+          echo "$(params.registry-password)" | docker login $(params.registry-url) -u $(params.registry-user) --password-stdin
+        else
+          echo "No registry credentials provided, skipping login."
+        fi
+        
+        # Push the image to the registry
+        echo "Pushing image to registry..."
+        docker push ${REGISTRY_IMAGE}
+        
+        echo "Image successfully pushed to registry!"
+  volumes:
+    - name: docker-storage
+      emptyDir: {}

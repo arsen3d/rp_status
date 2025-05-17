@@ -17,8 +17,8 @@ spec:
     spec:
       containers:
       - name: rp-dashboard
-        image: rp_status-rp-dashboard:latest
-        imagePullPolicy: Never
+        image: ${REGISTRY_URL}/rp_status-rp-dashboard:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 80
         resources:
@@ -28,3 +28,5 @@ spec:
           requests:
             cpu: "0.2"
             memory: "256Mi"
+      imagePullSecrets:
+      - name: registry-credentials  # This will be created in the deploy-application task if needed
