@@ -18,6 +18,7 @@ spec:
     repoURL: https://github.com/arsen3d/rp_status.git
     targetRevision: HEAD
     path: argocd
+    insecure: true
     plugin:
       name: timestamp-plugin
       env:
