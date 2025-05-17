@@ -7,7 +7,8 @@ metadata:
     app: rp-dashboard
   annotations:
     argocd.argoproj.io/compare-options: IgnoreResourceVersion,IgnoreResourceStatusField
-    argocd.argoproj.io/sync-options: Prune=false,SkipDryRunOnMissingResource=true,FieldManager=argocd-deploy,ApplyOutOfSyncOnly=true
+    argocd.argoproj.io/sync-options: Prune=false,SkipDryRunOnMissingResource=true,FieldManager=argocd-deploy
+    argocd.argoproj.io/sync-wave: "1"
     kubectl.kubernetes.io/restartedAt: '{{ now | date "2006-01-02T15:04:05Z07:00" }}'
 spec:
   replicas: 1
