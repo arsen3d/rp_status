@@ -11,3 +11,4 @@ metadata:
 data:
   # Static data that will change based on the annotation above causing a redeployment
   timestamp: "redeployed-at-changes-each-sync"
+  build_id: "{{ randAlphaNum 8 }}"

@@ -10,6 +10,8 @@ metadata:
     # argocd-image-updater.argoproj.io/write-back-method: git
     argocd.argoproj.io/refresh: hard
     argocd.argoproj.io/sync-options: Validate=false
+    argocd.argoproj.io/sync-wave: "0"
+    kubectl.kubernetes.io/restartedAt: '{{ now | date "2006-01-02T15:04:05Z07:00" }}'
 spec:
   project: default
   source:
@@ -30,6 +32,8 @@ spec:
       - FieldManager=argocd  # Control the field manager
       - IgnoreResourceVersion=true  # Ignore resource version differences
       - RespectIgnoreDifferences=false  # Ensures syncs occur despite ignored differences
+      - ApplyOutOfSyncOnly=false  # Force apply on every sync
+      - Replace=true  # Use replace instead of apply to ensure all resources are recreated
     retry:
       limit: 5
       backoff:

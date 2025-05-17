@@ -6,7 +6,8 @@ namespace: lilypad
 resources:
 - deployment.yaml
 - service.yaml
-# - application.yaml
+- configmap.yaml
+- application.yaml
 # - ingress.yaml
 # - tekton-pipeline.yaml
 # - tekton-tasks.yaml
@@ -22,3 +23,7 @@ labels:
 
 configurations:
 - kustomizeconfig.yaml
+
+# Custom hooks
+generators:
+- post-build-hook.sh
