@@ -75,13 +75,13 @@ const NetworkHealth = () => {
 
     // Generate recent incidents (if any)
     const recentIncidents = [
-      {
-        id: 'INC-001',
-        title: 'Data Storage Performance Degradation',
-        status: 'investigating',
-        time: new Date(Date.now() - 1000 * 60 * 30).getTime(), // 30 minutes ago
-        description: 'We are investigating reports of slower than normal data storage operations.',
-      },
+      // {
+      //   id: 'INC-001',
+      //   title: 'Data Storage Performance Degradation',
+      //   status: 'investigating',
+      //   time: new Date(Date.now() - 1000 * 60 * 30).getTime(), // 30 minutes ago
+      //   description: 'We are investigating reports of slower than normal data storage operations.',
+      // },
     ];
 
     return { 
