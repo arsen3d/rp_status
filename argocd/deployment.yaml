@@ -7,7 +7,7 @@ metadata:
     app: rp-dashboard
   annotations:
     argocd.argoproj.io/compare-options: IgnoreResourceVersion,IgnoreResourceStatusField
-    argocd.argoproj.io/sync-options: Prune=false,SkipDryRunOnMissingResource=true,FieldManager=argocd-deploy,Validate=false,RespectIgnoreDifferences=true
+    argocd.argoproj.io/sync-options: Prune=true,SkipDryRunOnMissingResource=true,FieldManager=argocd-deploy,Validate=false,RespectIgnoreDifferences=true
     argocd.argoproj.io/sync-wave: "1"
     # Use the git commit hash to trigger updates without completely replacing the deployment
     git-commit: "rev-git-commit"
@@ -15,12 +15,12 @@ metadata:
 spec:
   replicas: 1
   # Ensure pods are recreated in a controlled way
-  minReadySeconds: 1  # Wait 30 seconds after a pod is ready before considering it available
+  minReadySeconds: 1  # Wait 10 seconds after a pod is ready before considering it available
   strategy:
     type: RollingUpdate
     rollingUpdate:
       maxSurge: 1       # Allow one extra pod during updates
-      maxUnavailable: 0 # Never allow unavailable pods during update
+      maxUnavailable: 1 # Allow one pod to be unavailable during update
   selector:
     matchLabels:
       app: rp-dashboard
@@ -34,6 +34,7 @@ spec:
         # These annotations trigger a rolling update when changed
         kubectl.kubernetes.io/restartedAt: "timestamp-placeholder"
         git-commit: "rev-git-commit"
+        rollme: "{{ randAlphaNum 10 }}"  # Will generate a random string on each deployment
     spec:
       # Give pods time to gracefully terminate
       terminationGracePeriodSeconds: 1
