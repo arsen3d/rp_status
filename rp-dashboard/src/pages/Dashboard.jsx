@@ -16,7 +16,7 @@ const Dashboard = () => {
   return (
     <Box>
       <Typography variant="h4" gutterBottom>
-        Dashboard Overview !
+        Dashboard Overview
       </Typography>
       <Typography variant="subtitle1" color="text.secondary" paragraph>
         Real-time insights into the Lilypad decentralized computing network
