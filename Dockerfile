@@ -1,5 +1,5 @@
 # Base Node image
-FROM app-registry:5000/node:20-alpine AS builder
+FROM quay.io/library/node:20-alpine AS builder
 
 # Set working directory
 WORKDIR /app
