@@ -1,5 +1,5 @@
 # Base Node image
-FROM localhost:5000/node:20-alpine AS builder
+FROM 172.20.191.161:5000/node:20-alpine AS builder
 
 # Set working directory
 WORKDIR /app
@@ -15,7 +15,7 @@ COPY rp-dashboard/ ./
 RUN pnpm build
 
 # Production image
-FROM localhost:5000/nginx:alpine
+FROM 172.20.191.161:5000/nginx:alpine
 
 # Copy built files to Nginx serve directory
 COPY --from=builder /app/dist /usr/share/nginx/html
