@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: rp-dashboard
+  name: rp-dashboard-service
   namespace: lilypad
   labels:
-    app: rp-dashboard
+    app: rp-dashboard-service
     app.kubernetes.io/instance: rp-status
     managed-by: argocd
 spec:
