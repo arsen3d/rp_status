@@ -14,4 +14,4 @@ spec:
   - port: 8090
     targetPort: 80
     nodePort: 31090
-  type: NodePort
+  type: NodePort  # This is correct for Minikube environment
