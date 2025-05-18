@@ -15,7 +15,7 @@ metadata:
 spec:
   replicas: 1
   # Ensure pods are recreated in a controlled way
-  minReadySeconds: 30  # Wait 30 seconds after a pod is ready before considering it available
+  minReadySeconds: 1  # Wait 30 seconds after a pod is ready before considering it available
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -36,7 +36,7 @@ spec:
         git-commit: "rev-git-commit"
     spec:
       # Give pods time to gracefully terminate
-      terminationGracePeriodSeconds: 30
+      terminationGracePeriodSeconds: 1
       initContainers:
       - name: git-clone
         image: alpine/git:latest
