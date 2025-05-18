@@ -1,5 +1,5 @@
 # Base Node image
-FROM localhost:5000/node:20-alpine AS builder
+FROM app-registry:5000/node:20-alpine AS builder
 
 # Set working directory
 WORKDIR /app
