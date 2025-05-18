@@ -1,6 +1,5 @@
 # Base Node image
-# FROM quay.io/library/node:20-alpine AS builder
-FROM public.ecr.aws/k9x5n2l5/shopper-node-20-alpine:latest AS builder
+FROM node:22-alpine AS builder
 
 # Set working directory
 WORKDIR /app
