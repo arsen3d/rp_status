@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Box } from '@mui/material';
 import { useState, useEffect } from 'react';
 import React from 'react';
 import ThemeContextProvider from './context/ThemeContext';
@@ -107,16 +108,18 @@ function App() {
       <QueryClientProvider client={queryClient}>
         <ThemeContextProvider>
           <Router>
-            <MainLayout>
-              <Routes>
-                <Route path="/" element={<Dashboard />} />
-                <Route path="/providers" element={<Providers />} />
-                <Route path="/hardware" element={<Hardware />} />
-                <Route path="/deals" element={<Deals />} />
-                <Route path="/financial" element={<Financial />} />
-                <Route path="/network" element={<Network />} />
-              </Routes>
-            </MainLayout>
+            <Box sx={{ width: '100%', height: '100vh', overflow: 'hidden' }}>
+              <MainLayout>
+                <Routes>
+                  <Route path="/" element={<Dashboard />} />
+                  <Route path="/providers" element={<Providers />} />
+                  <Route path="/hardware" element={<Hardware />} />
+                  <Route path="/deals" element={<Deals />} />
+                  <Route path="/financial" element={<Financial />} />
+                  <Route path="/network" element={<Network />} />
+                </Routes>
+              </MainLayout>
+            </Box>
           </Router>
         </ThemeContextProvider>
       </QueryClientProvider>

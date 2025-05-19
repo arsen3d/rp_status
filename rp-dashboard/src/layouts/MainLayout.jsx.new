@@ -40,7 +40,7 @@ const MainLayout = ({ children }) => {
   ];
 
   return (
-    <Box sx={{ display: 'flex', height: '100vh', width: '100vw', overflow: 'hidden' }}>
+    <Box sx={{ display: 'flex' }}>
       {/* App Bar */}
       <AppBar
         position="fixed"
@@ -194,36 +194,18 @@ const MainLayout = ({ children }) => {
         component="main"
         sx={{
           flexGrow: 1,
-          height: 'calc(100vh - 64px)', // Subtract AppBar height
+          p: 3,
           width: '100%',
-          marginTop: '64px', // Push content below AppBar
-          overflow: 'hidden', // Hide overflow on container
+          height: 'calc(100vh - 64px)',
+          overflow: 'auto',
+          marginTop: '64px', // This is the height of the AppBar
           [theme.breakpoints.down('sm')]: {
-            height: 'calc(100vh - 56px)', // Adjust for mobile AppBar height
-            marginTop: '56px',
+            marginTop: '56px', // Mobile AppBar has 56px height
+            height: 'calc(100vh - 56px)',
           },
         }}
       >
-        <Box 
-          sx={{ 
-            height: '100%',
-            width: '100%',
-            overflow: 'auto', // Only this inner box gets the scrollbar
-            padding: 3, // Add padding here instead of on the parent
-            scrollbarWidth: 'thin', // For Firefox
-            '&::-webkit-scrollbar': {
-              width: '8px',
-              background: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)',
-            },
-            '&::-webkit-scrollbar-thumb': {
-              background: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)',
-              borderRadius: '4px',
-            },
-            overflowY: 'scroll', // Always show vertical scrollbar
-          }}
-        >
-          {children}
-        </Box>
+        {children}
       </Box>
       
       {/* Debug Panel - only visible in development mode */}
