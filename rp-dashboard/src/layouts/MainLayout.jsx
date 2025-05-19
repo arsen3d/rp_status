@@ -226,8 +226,8 @@ const MainLayout = ({ children }) => {
         </Box>
       </Box>
       
-      {/* Debug Panel - only visible in development mode */}
-      {process.env.NODE_ENV !== 'production' && <DebugPanel position="bottom-right" />}
+      {/* Debug Panel is hidden */}
+      {/* {process.env.NODE_ENV !== 'production' && <DebugPanel position="bottom-right" />} */}
     </Box>
   );
 };
