@@ -124,7 +124,7 @@ export const useResourceProvidersTable = () => {
     staleTime: 5000, // 5 seconds
     refetchInterval: 5000 // 5 seconds
   });
-  
+  console.log('rawData', rawData);
   // Transform the data to match the expected format for DataGrid
   const data = rawData ? rawData.map(provider => {
     return {

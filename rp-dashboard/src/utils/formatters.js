@@ -10,6 +10,16 @@ export const formatBytes = (bytes, decimals = 2) => {
   
   return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
 };
+export const formatVBytes = (bytes, decimals = 0) => {
+  if (bytes === 0) return '0 Bytes';
+  
+  const k = 1024;
+  const dm = decimals 
+  
+  const i = Math.floor(Math.log(bytes ) / Math.log(k ));
+  
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' +"GB";
+};
 
 // Format large numbers with commas
 export const formatNumber = (num) => {

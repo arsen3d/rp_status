@@ -24,7 +24,8 @@ import SearchIcon from '@mui/icons-material/Search';
 import { BarChart } from '@mui/x-charts/BarChart';
 import { useTheme } from '@mui/material/styles';
 import { useHardwareSpecs } from '../hooks/useResourceProviders';
-import { formatBytes, truncateAddress } from '../utils/formatters';
+import {formatVBytes, formatBytes, truncateAddress } from '../utils/formatters';
+
 import { debugLogger } from '../utils/debugLogger';
 
 const Hardware = () => {
@@ -257,7 +258,7 @@ const Hardware = () => {
                             {gpuInfo ? gpuInfo.name : 'N/A'}
                           </TableCell>
                           <TableCell align="right">
-                            {gpuInfo ? formatBytes(gpuInfo.vram) : 'N/A'}
+                            {gpuInfo ? formatVBytes(gpuInfo.vram ) : 'N/A'}
                           </TableCell>
                           <TableCell align="right">
                             {hw.spec.cpu ? hw.spec.cpu.toLocaleString() : 'N/A'}

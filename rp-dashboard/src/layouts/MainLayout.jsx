@@ -32,7 +32,7 @@ const MainLayout = ({ children }) => {
   // Menu items for the sidebar
   const menuItems = [
     { text: 'Dashboard', icon: <DashboardIcon />, path: '/' },
-    { text: 'Resource Providers', icon: <PeopleIcon />, path: '/providers' },
+    // { text: 'Resource Providers', icon: <PeopleIcon />, path: '/providers' },
     { text: 'Hardware', icon: <MemoryIcon />, path: '/hardware' },
     { text: 'Deals', icon: <HandshakeIcon />, path: '/deals' },
     { text: 'Financial Analytics', icon: <MonetizationOnIcon />, path: '/financial' },
@@ -195,9 +195,17 @@ const MainLayout = ({ children }) => {
         sx={{
           flexGrow: 1,
           p: 3,
-          pt: 10,
+          paddingTop: 0, // Remove top padding
+          position: 'relative',
+          height: 'calc(100vh - 64px)', // Account for AppBar height (64px is standard MUI AppBar height)
           overflow: 'auto',
-          minHeight: '100vh',
+          display: 'flex',
+          flexDirection: 'column',
+          marginTop: '64px', // This is the height of the AppBar
+          [theme.breakpoints.down('sm')]: {
+            marginTop: '56px', // Mobile AppBar has 56px height
+            height: 'calc(100vh - 56px)',
+          },
         }}
       >
         {children}
